@@ -7,16 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign in & Sign up Form</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='LoginSignup/style.css') }}">
-
 </head>
 
 <body>
-
     <main>
         <div class="box">
             <div class="inner-box">
                 <div class="forms-wrap">
-                    <form action="login.html" autocomplete="off" class="sign-in-form">
+                    <!-- SIGN IN FORM -->
+                    <form action="{{ url_for('login') }}" method="POST" autocomplete="off" class="sign-in-form">
+                        <input type="hidden" name="action" value="signin">
+
                         <div class="logo">
                             <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
                             <h4>HarayaHomes</h4>
@@ -24,31 +25,34 @@
 
                         <div class="heading">
                             <h2>Welcome Back</h2>
-                            <h6>Not registred yet?</h6>
+                            <h6>Not registered yet?</h6>
                             <a href="#" class="toggle">Sign up</a>
                         </div>
 
                         <div class="actual-form">
                             <div class="input-wrap">
-                                <input type="text" minlength="4" class="input-field" autocomplete="off" required />
-                                <label>E-Mail</label>
+                                <input type="email" name="email" minlength="4" class="input-field" autocomplete="off" required />
+                                <label>Email</label>
                             </div>
 
                             <div class="input-wrap">
-                                <input type="password" minlength="4" class="input-field" autocomplete="off" required />
+                                <input type="password" name="password" minlength="4" class="input-field" autocomplete="off" required />
                                 <label>Password</label>
                             </div>
 
                             <input type="submit" value="Sign In" class="sign-btn" />
 
                             <p class="text">
-                                Forgotten your password or your login datails?
+                                Forgotten your password or login details?
                                 <a href="#">Get help</a> signing in
                             </p>
                         </div>
                     </form>
 
-                    <form action="login.html" autocomplete="off" class="sign-up-form">
+                    <!-- SIGN UP FORM -->
+                    <form action="{{ url_for('login') }}" method="POST" autocomplete="off" class="sign-up-form">
+                        <input type="hidden" name="action" value="signup">
+
                         <div class="logo">
                             <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
                             <h4>HarayaHomes</h4>
@@ -62,22 +66,22 @@
 
                         <div class="actual-form">
                             <div class="input-wrap">
-                                <input type="text" minlength="4" class="input-field" autocomplete="off" required />
+                                <input type="text" name="fname" minlength="2" class="input-field" autocomplete="off" required />
                                 <label>First Name</label>
                             </div>
 
                             <div class="input-wrap">
-                                <input type="text" minlength="4" class="input-field" autocomplete="off" required />
+                                <input type="text" name="lname" minlength="2" class="input-field" autocomplete="off" required />
                                 <label>Last Name</label>
                             </div>
 
                             <div class="input-wrap">
-                                <input type="email" class="input-field" autocomplete="off" required />
+                                <input type="email" name="email" class="input-field" autocomplete="off" required />
                                 <label>Email</label>
                             </div>
 
                             <div class="input-wrap">
-                                <input type="password" minlength="4" class="input-field" autocomplete="off" required />
+                                <input type="password" name="password" minlength="4" class="input-field" autocomplete="off" required />
                                 <label>Password</label>
                             </div>
 
@@ -97,7 +101,6 @@
                         <img src="{{ url_for('static', filename='LoginSignup/img/image1.jpg') }}" class="image img-1 show" alt="Image 1">
                         <img src="{{ url_for('static', filename='LoginSignup/img/image2.jpg') }}" class="image img-2" alt="Image 2">
                         <img src="{{ url_for('static', filename='LoginSignup/img/image3.jpg') }}" class="image img-3" alt="Image 3">
-
                     </div>
 
                     <div class="text-slider">
@@ -119,8 +122,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Javascript file -->
 
     <script src="{{ url_for('static', filename='LoginSignup/app.js') }}"></script>
 </body>
