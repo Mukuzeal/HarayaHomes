@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ✅ Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Your existing styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+    <script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+
+    <title>Admin Dashboard · Haraya Home</title>
+</head>
+
+<body>
+    <header>
+        <div class="logo ">
+            <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
+        </div>
+
+
+        <nav class="top-nav ">
+            <a class="notification " href="# " title="Notifications ">
+                <i class="fas fa-bell "></i>
+            </a>
+            <a class="mail " href="# " title="Mail ">
+                <i class="fas fa-envelope "></i>
+            </a>
+            <a class="admin " href="# " title="Admin Settings ">
+                <i class="fas fa-user-cog "></i>
+            </a>
+        </nav>
+    </header>
+
+    <div class="container ">
+        <aside class="sidebar ">
+            <nav class="sidebar-nav ">
+                <a class="dashboard " href="/dashboard ">Dashboard</a>
+                <a class="commisions " href="/commissions ">Commissions</a>
+                <a class="applications " href="/applications ">Applications</a>
+                <a class="users " href="/users ">Users</a>
+                <a class="reports " href="/reports ">Reports</a>
+                <a class="products " href="/products ">Products</a>
+            </nav>
+        </aside>
+
+        <!-- ✅ Main Content Wrapper -->
+        <div class="main-content ">
+            <!-- Summary cards -->
+            <section class="trends card ">
+                <div class="section-header ">
+                    <h3>Trends</h3>
+                    <div class="actions-inline ">
+                        <button class="btn btn-light "><i class="fa-solid fa-download "></i> Export</button>
+                        <button class="btn btn-light "><i class="fa-solid fa-gear "></i></button>
+                    </div>
+                </div>
+                <div class="placeholder-chart ">Chart placeholder</div>
+            </section>
+
+            <section class="total-earned card ">
+                <div class="section-header ">
+                    <h3>Total Earned</h3>
+                    <span class="badge badge-success ">+12% WoW</span>
+                </div>
+                <p class="metric ">₱ 0.00</p>
+                <p class="subtext ">This week</p>
+            </section>
+
+            <section class="top-products card ">
+                <div class="section-header ">
+                    <h3>Top Products</h3>
+                    <button class="btn btn-light ">View all</button>
+                </div>
+                <table class="table compact ">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Seller</th>
+                            <th>Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Main table area -->
+            <main class="content card ">
+                <div class="section-header ">
+                    <h3>Recent Orders</h3>
+                    <div class="actions-inline ">
+                        <button class="btn btn-primary "><i class="fa-solid fa-plus "></i> Create order</button>
+                        <button class="btn btn-outline "><i class="fa-solid fa-file-export "></i> Export CSV</button>
+                        <button class="btn btn-light "><i class="fa-solid fa-rotate "></i></button>
+                    </div>
+                </div>
+
+                <div class="toolbar ">
+                    <input class="input " type="search " placeholder="Search orders, buyers, status... ">
+                    <div class="toolbar-right ">
+                        <select class="input ">
+              <option>Status: All</option>
+              <option>Pending</option>
+              <option>Paid</option>
+              <option>Shipped</option>
+              <option>Delivered</option>
+              <option>Cancelled</option>
+            </select>
+                        <select class="input ">
+              <option>Date: Last 30 days</option>
+              <option>Today</option>
+              <option>This week</option>
+              <option>This month</option>
+            </select>
+                    </div>
+                </div>
+
+                <table class="table " id="orders-table ">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Buyer</th>
+                            <th>Seller</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td><span class="badge ">Loading...</span></td>
+                            <td>Loading...</td>
+                            <td>
+                                <button class="btn btn-light btn-icon " title="View "><i class="fa-regular fa-eye "></i></button>
+                                <button class="btn btn-light btn-icon " title="Edit "><i class="fa-regular fa-pen-to-square "></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Quick actions grid -->
+                <div class="quick-actions ">
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-user-plus "></i> Add User</button>
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-store "></i> Approve Seller</button>
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-box "></i> Add Product</button>
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-motorcycle "></i> Verify Rider</button>
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-percent "></i> Manage Commissions</button>
+                    <button class="qa btn btn-outline "><i class="fa-solid fa-chart-line "></i> Reports</button>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>

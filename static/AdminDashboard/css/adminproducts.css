@@ -1,0 +1,8 @@
+/* Page-specific accents for Products */
+.products { font-weight: 700; }
+
+:root { --accent: #ef4444; } /* red */
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { border-color: var(--accent); }
+.table tr:hover td { background: #fff5f5; }
+

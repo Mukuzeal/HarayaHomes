@@ -1,0 +1,9 @@
+/* Page-specific accents for Reports */
+.reports { font-weight: 700; }
+
+:root { --accent: #3b82f6; } /* blue */
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { border-color: var(--accent); }
+.qa { border-color: var(--accent); }
+.table tr:hover td { background: #f3f8ff; }
+

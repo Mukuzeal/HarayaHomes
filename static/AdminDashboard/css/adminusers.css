@@ -1,0 +1,8 @@
+/* Page-specific accents for Users */
+.users { font-weight: 700; }
+
+:root { --accent: #f59e0b; } /* amber */
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { border-color: var(--accent); }
+.table tr:hover td { background: #fff8e6; }
+

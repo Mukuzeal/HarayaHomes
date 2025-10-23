@@ -1,0 +1,15 @@
+/* Page-specific accents for Commissions */
+.commisions { font-weight: 700; }
+
+:root {
+  --accent: #8b5cf6; /* violet */
+}
+
+/* Buttons override */
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { border-color: var(--accent); color: #000; }
+.badge { background: #efe9ff; color: #3b2f7f; }
+
+/* Table tweaks for readability */
+.table tr:hover td { background: #faf7ff; }
+

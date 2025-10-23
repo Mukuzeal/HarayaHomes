@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/adminusers.css') }}">
+    <title>Admin · Users</title>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"> </div>
+        <nav class="top-nav">
+            <a class="notification" href="#" title="Notifications"><i class="fas fa-bell"></i></a>
+            <a class="mail" href="#" title="Mail"><i class="fas fa-envelope"></i></a>
+            <a class="admin" href="#" title="Admin Settings"><i class="fas fa-user-cog"></i></a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a class="dashboard" href="/dashboard">Dashboard</a>
+                <a class="commisions" href="/commissions">Commissions</a>
+                <a class="applications" href="/applications">Applications</a>
+                <a class="users" href="/users">Users</a>
+                <a class="reports" href="/reports">Reports</a>
+                <a class="products" href="/products">Products</a>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <section class="card content">
+                <div class="section-header">
+                    <h3 id="page-title">Users</h3>
+                    <div class="actions-inline">
+                        <button class="btn btn-secondary" id="toggle-view-btn">
+                        <i class="fa-solid fa-archive"></i> View Archived
+                    </button>
+                        <button class="btn btn-primary" id="add-user-btn" onclick="showAddUserModal()">
+                        <i class="fa-solid fa-user-plus"></i> Add User
+                    </button>
+                    </div>
+                </div>
+
+                <table class="table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Birthday</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggle-view-btn');
+        const usersTableBody = document.querySelector('#users-table tbody');
+        let viewingArchived = false;
+
+        async function fetchUsers() {
+            const endpoint = viewingArchived ? '/api/archived-users' : '/api/users';
+            try {
+                const res = await fetch(endpoint);
+                if (!res.ok) throw new Error('Failed to fetch');
+                const data = await res.json();
+                renderTableRows(data);
+            } catch (err) {
+                console.error(err);
+                usersTableBody.innerHTML = `<tr><td colspan="8">Error loading data.</td></tr>`;
+            }
+        }
+
+        function renderTableRows(rows) {
+            if (!Array.isArray(rows) || rows.length === 0) {
+                usersTableBody.innerHTML = `<tr><td colspan="8">No records found.</td></tr>`;
+                return;
+            }
+
+            usersTableBody.innerHTML = rows.map(row => {
+                const id = row.id;
+                const first = row.first_name || '';
+                const last = row.last_name || '';
+                const email = row.email || '';
+                const role = row.role || '';
+                const status = row.status || '';
+                const created = (row.created_at || row.archived_at || '').replace('T', ' ').split('.')[0];
+
+                if (viewingArchived) {
+                    return `<tr data-id="${id}">
+                <td>${first}</td>
+                <td>${last}</td>
+                <td>—</td>
+                <td>${email}</td>
+                <td>${role}</td>
+                <td><span class="badge">${status}</span></td>
+                <td>${created}</td>
+                <td>
+                    <button class="btn btn-light btn-icon" title="Restore" onclick="restoreArchived(${id})">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button class="btn btn-danger btn-icon" title="Delete Permanently" onclick="deleteArchived(${id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+                } else {
+                    return `<tr data-id="${id}">
+                <td contenteditable="true" data-field="first_name">${first}</td>
+                <td contenteditable="true" data-field="last_name">${last}</td>
+                <td>—</td>
+                <td contenteditable="true" data-field="email">${email}</td>
+                <td>
+                    <select data-field="role">
+                        <option value="user" ${role === 'user' ? 'selected' : ''}>User</option>
+                        <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </td>
+                <td><span class="badge">${status}</span></td>
+                <td>${created}</td>
+                <td>
+                    <button class="btn btn-success btn-icon" title="Save" onclick="saveUser(${id}, this)">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+                    <button class="btn btn-warning btn-icon" title="Archive" onclick="archiveUser(${id})">
+                        <i class="fa-solid fa-archive"></i>
+                    </button>
+                    <button class="btn btn-danger btn-icon" title="Delete" onclick="deleteUser(${id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+                }
+            }).join('');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            viewingArchived = !viewingArchived;
+            toggleBtn.innerHTML = viewingArchived ?
+                '<i class="fa-solid fa-list"></i> View Active' :
+                '<i class="fa-solid fa-archive"></i> View Archived';
+            fetchUsers();
+        });
+
+        async function saveUser(id, btn) {
+            const row = btn.closest('tr');
+            const first_name = row.querySelector('[data-field="first_name"]').innerText.trim();
+            const last_name = row.querySelector('[data-field="last_name"]').innerText.trim();
+            const email = row.querySelector('[data-field="email"]').innerText.trim();
+            const role = row.querySelector('[data-field="role"]').value;
+
+            try {
+                const res = await fetch(`/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        first_name,
+                        last_name,
+                        email,
+                        role
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Update failed');
+                alert(data.message || 'User updated successfully');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // Archive, Delete, Restore, DeleteArchived functions remain unchanged
+        async function archiveUser(userId) {
+            if (!confirm('Archive this user?')) return;
+            const res = await fetch('/api/users/archive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Archive failed');
+            alert(data.message || 'User archived');
+            fetchUsers();
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Delete this user permanently?')) return;
+            const res = await fetch('/api/users/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            alert(data.message || 'User deleted');
+            fetchUsers();
+        }
+
+        async function restoreArchived(id) {
+            if (!confirm('Restore this archived user?')) return;
+            const res = await fetch('/api/archived/restore', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    archived_id: id
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Restore failed');
+            alert(data.message || 'User restored');
+            fetchUsers();
+        }
+
+        async function deleteArchived(id) {
+            if (!confirm('Permanently delete this archived user?')) return;
+            const res = await fetch('/api/archived/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    archived_id: id
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            alert(data.message || 'Archived entry deleted');
+            fetchUsers();
+        }
+
+        function showAddUserModal() {
+            alert('Add user functionality not implemented yet.');
+        }
+
+        // Initial fetch
+        fetchUsers();
+    </script>
+</body>
+
+</html>

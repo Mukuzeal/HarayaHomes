@@ -1,0 +1,8 @@
+/* Page-specific accents for Applications */
+.applications { font-weight: 700; }
+
+:root { --accent: #10b981; } /* emerald */
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { border-color: var(--accent); }
+.table tr:hover td { background: #f0fff7; }
+

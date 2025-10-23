@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/adminproducts.css') }}">
+    <script src="../js/admin.js" defer></script>
+    <title>Admin · Products</title>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"> </div>
+        <nav class="top-nav">
+            <a class="notification" href="#" title="Notifications"><i class="fas fa-bell"></i></a>
+            <a class="mail" href="#" title="Mail"><i class="fas fa-envelope"></i></a>
+            <a class="admin" href="#" title="Admin Settings"><i class="fas fa-user-cog"></i></a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a class="dashboard" href="/dashboard">Dashboard</a>
+                <a class="commisions" href="/commissions">Commissions</a>
+                <a class="applications" href="/applications">Applications</a>
+                <a class="users" href="/users">Users</a>
+                <a class="reports" href="/reports">Reports</a>
+                <a class="products" href="/products">Products</a>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <section class="card content">
+                <div class="section-header">
+                    <h3>Products</h3>
+                    <div class="actions-inline">
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add product</button>
+                    </div>
+                </div>
+                <table class="table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Seller</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td><span class="badge">Loading...</span></td>
+                            <td><button class="btn btn-light btn-icon"><i class="fa-regular fa-pen-to-square"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>
