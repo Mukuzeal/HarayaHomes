@@ -65,18 +65,24 @@
             <section class="total-earned card ">
                 <div class="section-header ">
                     <h3>Total Earned</h3>
-                    <span class="badge badge-success ">+12% WoW</span>
+                    <div class="actions-inline">
+                        <button class="btn btn-outline btn-sm" onclick="admin.filterEarnings('week')">This Week</button>
+                        <button class="btn btn-outline btn-sm" onclick="admin.filterEarnings('month')">This Month</button>
+                    </div>
                 </div>
-                <p class="metric ">₱ 0.00</p>
-                <p class="subtext ">This week</p>
+                <p class="metric " id="total-earned">₱ 0.00</p>
+                <p class="subtext " id="earnings-period">This week</p>
             </section>
 
             <section class="top-products card ">
                 <div class="section-header ">
                     <h3>Top Products</h3>
-                    <button class="btn btn-light ">View all</button>
+                    <div class="actions-inline">
+                        <button class="btn btn-outline btn-sm" onclick="admin.filterTopProducts('week')">This Week</button>
+                        <button class="btn btn-outline btn-sm" onclick="admin.filterTopProducts('month')">This Month</button>
+                    </div>
                 </div>
-                <table class="table compact ">
+                <table class="table compact " id="top-products-table">
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -87,10 +93,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -99,44 +105,34 @@
             <!-- Main table area -->
             <main class="content card ">
                 <div class="section-header ">
-                    <h3>Recent Orders</h3>
+                    <h3>Best Sellers</h3>
                     <div class="actions-inline ">
-                        <button class="btn btn-primary "><i class="fa-solid fa-plus "></i> Create order</button>
-                        <button class="btn btn-outline "><i class="fa-solid fa-file-export "></i> Export CSV</button>
-                        <button class="btn btn-light "><i class="fa-solid fa-rotate "></i></button>
+                        <button class="btn btn-outline " onclick="admin.exportBestSellersPDF()"><i class="fa-solid fa-file-pdf "></i> Export PDF</button>
+                        <button class="btn btn-light " onclick="admin.refreshBestSellers()"><i class="fa-solid fa-rotate "></i></button>
                     </div>
                 </div>
 
                 <div class="toolbar ">
-                    <input class="input " type="search " placeholder="Search orders, buyers, status... ">
+                    <input class="input " type="search " placeholder="Search sellers, products... " id="best-sellers-search">
                     <div class="toolbar-right ">
-                        <select class="input ">
-              <option>Status: All</option>
-              <option>Pending</option>
-              <option>Paid</option>
-              <option>Shipped</option>
-              <option>Delivered</option>
-              <option>Cancelled</option>
-            </select>
-                        <select class="input ">
-              <option>Date: Last 30 days</option>
-              <option>Today</option>
-              <option>This week</option>
-              <option>This month</option>
+                        <select class="input " id="best-sellers-period">
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="all">All Time</option>
             </select>
                     </div>
                 </div>
 
-                <table class="table " id="orders-table ">
+                <table class="table " id="best-sellers-table ">
                     <thead>
                         <tr>
-                            <th>Order #</th>
-                            <th>Buyer</th>
-                            <th>Seller</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th></th>
+                            <th>Seller ID</th>
+                            <th>Seller Name</th>
+                            <th>Shop Name</th>
+                            <th>Total Products Sold</th>
+                            <th>Total Revenue</th>
+                            <th>Average Rating</th>
+                            <th>Commission Earned</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -145,25 +141,13 @@
                             <td>Loading...</td>
                             <td>Loading...</td>
                             <td>Loading...</td>
-                            <td><span class="badge ">Loading...</span></td>
                             <td>Loading...</td>
-                            <td>
-                                <button class="btn btn-light btn-icon " title="View "><i class="fa-regular fa-eye "></i></button>
-                                <button class="btn btn-light btn-icon " title="Edit "><i class="fa-regular fa-pen-to-square "></i></button>
-                            </td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <!-- Quick actions grid -->
-                <div class="quick-actions ">
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-user-plus "></i> Add User</button>
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-store "></i> Approve Seller</button>
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-box "></i> Add Product</button>
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-motorcycle "></i> Verify Rider</button>
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-percent "></i> Manage Commissions</button>
-                    <button class="qa btn btn-outline "><i class="fa-solid fa-chart-line "></i> Reports</button>
-                </div>
             </main>
         </div>
     </div>

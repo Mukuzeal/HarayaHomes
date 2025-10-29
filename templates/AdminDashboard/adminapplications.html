@@ -40,7 +40,9 @@
                 <div class="section-header">
                     <h3>Applications (Sellers & Riders)</h3>
                     <div class="actions-inline">
-                        <button class="btn btn-outline"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                        <button class="btn btn-outline" onclick="admin.filterApplications('all')"><i class="fa-solid fa-list"></i> All</button>
+                        <button class="btn btn-outline" onclick="admin.filterApplications('seller')"><i class="fa-solid fa-store"></i> Sellers</button>
+                        <button class="btn btn-outline" onclick="admin.filterApplications('rider')"><i class="fa-solid fa-motorcycle"></i> Riders</button>
                     </div>
                 </div>
                 <table class="table" id="applications-table">
@@ -48,9 +50,13 @@
                         <tr>
                             <th>Applicant</th>
                             <th>Type</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Category</th>
                             <th>Submitted</th>
                             <th>Status</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,10 +64,14 @@
                             <td>Loading...</td>
                             <td>Loading...</td>
                             <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
                             <td><span class="badge">Loading...</span></td>
                             <td>
-                                <button class="btn btn-primary">Approve</button>
-                                <button class="btn btn-outline">Reject</button>
+                                <button class="btn btn-success btn-sm" onclick="admin.approveApplication(this)" title="Approve"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="admin.rejectApplication(this)" title="Reject"><i class="fa-solid fa-times"></i></button>
                             </td>
                         </tr>
                     </tbody>

@@ -40,7 +40,8 @@
                 <div class="section-header">
                     <h3>Products</h3>
                     <div class="actions-inline">
-                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add product</button>
+                        <button class="btn btn-outline" onclick="admin.toggleView('active')"><i class="fa-solid fa-eye"></i> Active Products</button>
+                        <button class="btn btn-outline" onclick="admin.toggleView('archived')"><i class="fa-solid fa-archive"></i> Archived Products</button>
                     </div>
                 </div>
                 <table class="table" id="products-table">
@@ -50,8 +51,9 @@
                             <th>Seller</th>
                             <th>Price</th>
                             <th>Stock</th>
+                            <th>Category</th>
                             <th>Status</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,8 +62,12 @@
                             <td>Loading...</td>
                             <td>Loading...</td>
                             <td>Loading...</td>
+                            <td>Loading...</td>
                             <td><span class="badge">Loading...</span></td>
-                            <td><button class="btn btn-light btn-icon"><i class="fa-regular fa-pen-to-square"></i></button></td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" title="Warn Seller"><i class="fa-solid fa-exclamation-triangle"></i></button>
+                                <button class="btn btn-danger btn-sm" title="Archive"><i class="fa-solid fa-archive"></i></button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

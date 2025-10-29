@@ -38,22 +38,31 @@
         <div class="main-content">
             <section class="card content">
                 <div class="section-header">
-                    <h3>Commission Payouts</h3>
+                    <h3>Commission Management</h3>
                     <div class="actions-inline">
-                        <button class="btn btn-outline"><i class="fa-solid fa-file-export"></i> Export</button>
-                        <button class="btn btn-primary"><i class="fa-solid fa-coins"></i> Pay selected</button>
+                        <button class="btn btn-outline" onclick="admin.exportCommissionsPDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                        <button class="btn btn-primary" onclick="admin.showCommissionSettings()"><i class="fa-solid fa-cog"></i> Settings</button>
                     </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="qa btn btn-outline" onclick="admin.filterCommissions('all')"><i class="fa-solid fa-list"></i> All Commissions</button>
+                    <button class="qa btn btn-outline" onclick="admin.filterCommissions('pending')"><i class="fa-solid fa-clock"></i> Pending</button>
+                    <button class="qa btn btn-outline" onclick="admin.filterCommissions('approved')"><i class="fa-solid fa-check"></i> Approved</button>
+                    <button class="qa btn btn-outline" onclick="admin.filterCommissions('rejected')"><i class="fa-solid fa-times"></i> Rejected</button>
                 </div>
                 <table class="table" id="commissions-table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" aria-label="Select all"></th>
-                            <th>Seller</th>
+                            <th><input type="checkbox" aria-label="Select all" onchange="admin.toggleSelectAll(this)"></th>
                             <th>Order #</th>
+                            <th>Seller</th>
+                            <th>Product</th>
+                            <th>Order Amount</th>
                             <th>Commission Rate</th>
-                            <th>Amount</th>
+                            <th>Commission Amount</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,8 +72,14 @@
                             <td>Loading...</td>
                             <td>Loading...</td>
                             <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
                             <td><span class="badge">Loading...</span></td>
                             <td>Loading...</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="admin.approveCommission(this)" title="Approve"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="admin.rejectCommission(this)" title="Reject"><i class="fa-solid fa-times"></i></button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

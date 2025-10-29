@@ -42,9 +42,6 @@
                         <button class="btn btn-secondary" id="toggle-view-btn">
                         <i class="fa-solid fa-archive"></i> View Archived
                     </button>
-                        <button class="btn btn-primary" id="add-user-btn" onclick="showAddUserModal()">
-                        <i class="fa-solid fa-user-plus"></i> Add User
-                    </button>
                     </div>
                 </div>
 
@@ -126,12 +123,7 @@
                 <td contenteditable="true" data-field="last_name">${last}</td>
                 <td>—</td>
                 <td contenteditable="true" data-field="email">${email}</td>
-                <td>
-                    <select data-field="role">
-                        <option value="user" ${role === 'user' ? 'selected' : ''}>User</option>
-                        <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
-                    </select>
-                </td>
+                <td><span class="badge">${role}</span></td>
                 <td><span class="badge">${status}</span></td>
                 <td>${created}</td>
                 <td>
@@ -163,7 +155,7 @@
             const first_name = row.querySelector('[data-field="first_name"]').innerText.trim();
             const last_name = row.querySelector('[data-field="last_name"]').innerText.trim();
             const email = row.querySelector('[data-field="email"]').innerText.trim();
-            const role = row.querySelector('[data-field="role"]').value;
+            const role = null; // role is immutable via UI
 
             try {
                 const res = await fetch(`/api/users/${id}`, {
@@ -171,12 +163,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        first_name,
-                        last_name,
-                        email,
-                        role
-                    })
+                    body: JSON.stringify({ first_name, last_name, email })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Update failed');
@@ -254,10 +241,6 @@
             if (!res.ok) throw new Error(data.error || 'Delete failed');
             alert(data.message || 'Archived entry deleted');
             fetchUsers();
-        }
-
-        function showAddUserModal() {
-            alert('Add user functionality not implemented yet.');
         }
 
         // Initial fetch

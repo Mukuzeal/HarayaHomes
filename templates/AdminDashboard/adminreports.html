@@ -39,15 +39,41 @@
                 <div class="section-header">
                     <h3>Reports</h3>
                     <div class="actions-inline">
-                        <button class="btn btn-outline"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                        <button class="btn btn-outline" onclick="admin.exportReportsPDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
                     </div>
                 </div>
-                <div class="quick-actions">
-                    <button class="qa btn btn-outline"><i class="fa-solid fa-chart-line"></i> Sales by day</button>
-                    <button class="qa btn btn-outline"><i class="fa-solid fa-store"></i> Sales by seller</button>
-                    <button class="qa btn btn-outline"><i class="fa-solid fa-box"></i> Inventory</button>
-                    <button class="qa btn btn-outline"><i class="fa-solid fa-percent"></i> Commissions</button>
-                </div>
+                <table class="table" id="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Reporter</th>
+                            <th>Reported User</th>
+                            <th>User Role</th>
+                            <th>User Email</th>
+                            <th>Report Details</th>
+                            <th>Offense Level</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td>Loading...</td>
+                            <td><span class="badge">Loading...</span></td>
+                            <td>Loading...</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="admin.banUser(this, 'temporary')" title="Temporary Ban"><i class="fa-solid fa-clock"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="admin.banUser(this, 'permanent')" title="Permanent Ban"><i class="fa-solid fa-ban"></i></button>
+                                <button class="btn btn-success btn-sm" onclick="admin.resolveReport(this)" title="Resolve"><i class="fa-solid fa-check"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
         </div>
     </div>
