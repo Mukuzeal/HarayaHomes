@@ -961,5 +961,28 @@ def delete_archived():
         if cursor: cursor.close()
         if conn: conn.close()
 
+@app.route("/api/archived-users")
+@login_required(role="admin")
+def api_archived_users():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT id, fname as first_name, lname as last_name, email,
+                   role, account_status as status, created_at
+            FROM users 
+            WHERE account_status = 'deleted'
+            ORDER BY created_at DESC
+        """)
+        
+        users = cursor.fetchall()
+        return jsonify(users)
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 if __name__ == "__main__":
     app.run(debug=True)
