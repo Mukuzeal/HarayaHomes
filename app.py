@@ -1083,5 +1083,32 @@ def apply():
     return render_template("SellerApplications/SellerApplications.html")
 
 
+@app.route("/seller")
+@login_required()  # require login; change to login_required(role="seller") if you restrict to seller role
+def seller_dashboard():
+    return render_template("SellerDashboard/sellerdashboard.html")
+
+# Serve individual seller pages under /seller/<page>
+@app.route("/seller/<path:page>")
+@login_required()
+def seller_page(page):
+    # Allow links like "/seller/orders" or "/seller/orders.html" or relative links from /seller/products to "product_form.html"
+    if not page.endswith(".html"):
+        page = page + ".html"
+    try:
+        return render_template(f"SellerDashboard/{page}")
+    except Exception:
+        # template doesn't exist
+        return "Page not found", 404
+
+# explicit route for product_form.html if clicked as relative link (from /seller/products -> product_form.html)
+@app.route("/seller/product_form.html")
+@login_required()
+def seller_product_form_html():
+    try:
+        return render_template("SellerDashboard/product_form.html")
+    except Exception:
+        return "Page not found", 404
+
 if __name__ == "__main__":
     app.run(debug=True)
