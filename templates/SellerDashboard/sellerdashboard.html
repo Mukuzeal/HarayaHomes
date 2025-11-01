@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Seller Dashboard - Hub</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header>
+		<div class="logo">
+			<img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
+		</div>
+
+		<nav class="top-nav">
+			<a class="notification" href="#" title="Notifications"><i class="fas fa-bell"></i></a>
+			<a class="mail" href="#" title="Mail"><i class="fas fa-envelope"></i></a>
+			<a class="admin" href="#" title="Profile"><i class="fas fa-user-cog"></i></a>
+		</nav>
+	</header>
+
+	<div class="container">
+		<aside class="sidebar">
+			<nav class="sidebar-nav">
+				<a class="dashboard" href="/seller">Overview</a>
+				<a class="applications" href="/seller/orders">Orders</a>
+				<a class="products" href="/seller/products">Products</a>
+				<a class="reports" href="/seller/reports">Reports</a>
+				<a class="users" href="/seller/profile">Profile</a>
+				<a class="notifications" href="/seller/notifications">Notifications</a>
+				<a class="messages" href="/seller/messages">Messages</a>
+				<a class="settings" href="/seller/settings">Settings</a>
+			</nav>
+		</aside>
+
+		<div class="main-content">
+			<section class="trends card">
+				<div class="section-header">
+					<h3>Quick Links & Overview</h3>
+					<div class="actions-inline">
+						<button class="btn btn-light">Export</button>
+						<button class="btn btn-light"><i class="fa-solid fa-gear"></i></button>
+					</div>
+				</div>
+				<div class="card">
+					<div class="header-row">
+						<div>
+							<h4>Seller Hub</h4>
+							<p class="small">Manage products, orders and payments</p>
+						</div>
+						<div class="kv">
+							<span class="small">Store</span>
+							<span class="badge">HarayaHomes</span>
+						</div>
+					</div>
+
+					<div class="sd-widgets" style="margin-top:16px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+						<div class="card">
+							<div class="small">Total Products</div>
+							<div class="metric" id="total-products">0</div>
+						</div>
+						<div class="card">
+							<div class="small">Orders (Today/Week/Overall)</div>
+							<div id="orders-summary" class="metric">0 / 0 / 0</div>
+						</div>
+						<div class="card">
+							<div class="small">Total Earnings</div>
+							<div id="total-earnings" class="metric">₱ 0.00</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<main class="content card">
+				<h3>Recent Activities</h3>
+				<ul id="activities-list" class="small">
+					<li>No recent activities</li>
+				</ul>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
