@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Seller Profile</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header><div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div></header>
+
+	<div class="container">
+		<aside class="sidebar"><nav class="sidebar-nav"><a href="/seller">Overview</a><a href="/seller/profile" class="users active">Profile</a></nav></aside>
+
+		<div class="main-content">
+			<main class="content card">
+				<div class="section-header"><h3>Profile</h3></div>
+				<form id="profile-form">
+					<label>Business Name: <input class="input" name="business_name"></label>
+					<label>Contact Email: <input class="input" type="email" name="email"></label>
+					<label>Contact Phone: <input class="input" name="phone"></label>
+					<label>Store Logo: <input class="input" type="file" name="logo"></label>
+					<label>Bank Account / Payout Method: <input class="input" name="bank_info"></label>
+					<div style="margin-top:12px"><button class="btn" type="submit">Save</button></div>
+				</form>
+
+				<section style="margin-top:16px" class="card">
+					<h4>Password & Security</h4>
+					<button class="btn btn-outline" onclick="location.href='#change-password'">Change Password</button>
+				</section>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
