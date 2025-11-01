@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Settings</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header><div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div></header>
+
+	<div class="container">
+		<aside class="sidebar"><nav class="sidebar-nav"><a href="/seller">Overview</a><a href="/seller/settings" class="settings active">Settings</a></nav></aside>
+
+		<div class="main-content">
+			<main class="content card">
+				<div class="section-header"><h3>Account Settings</h3></div>
+
+				<section class="card">
+					<label>Email: <input class="input" type="email" name="email"></label>
+					<div style="margin-top:8px"><button class="btn">Change Email / Password</button></div>
+				</section>
+
+				<section class="card" style="margin-top:12px">
+					<h4>Payout Method</h4>
+					<label>Bank / PayPal / Other: <input class="input" name="payout"></label>
+				</section>
+
+				<section class="card" style="margin-top:12px">
+					<h4>Preferences</h4>
+					<label><input type="checkbox" name="notify_orders"> New order notifications</label><br>
+					<label><input type="checkbox" name="notify_payments"> Payment confirmations</label>
+				</section>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
