@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Messages</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header><div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div></header>
+
+	<div class="container">
+		<aside class="sidebar"><nav class="sidebar-nav"><a href="/seller">Overview</a><a href="/seller/messages" class="mail active">Messages</a></nav></aside>
+
+		<div class="main-content">
+			<main class="content card">
+				<div class="section-header"><h3>Messages</h3></div>
+
+				<div style="display:grid;grid-template-columns: 280px 1fr; gap:12px;">
+					<section class="card">
+						<h4>Conversations</h4>
+						<ul id="convo-list" class="small"><li>No conversations</li></ul>
+					</section>
+
+					<section class="card">
+						<div id="messages" style="min-height:200px">No messages</div>
+						<form id="chat-form" style="margin-top:8px;display:flex;gap:8px;">
+							<input class="input" name="message" placeholder="Type a message">
+							<button class="btn" type="submit">Send</button>
+						</form>
+					</section>
+				</div>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
