@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Dashboard Overview</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header>
+		<div class="logo">
+			<img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
+		</div>
+		<nav class="top-nav">
+			<a class="notification" href="#"><i class="fas fa-bell"></i></a>
+			<a class="mail" href="#"><i class="fas fa-envelope"></i></a>
+			<a class="admin" href="#"><i class="fas fa-user-cog"></i></a>
+		</nav>
+	</header>
+
+	<div class="container">
+		<aside class="sidebar">
+			<nav class="sidebar-nav">
+				<a class="dashboard active" href="/seller">Overview</a>
+				<a class="applications" href="/seller/orders">Orders</a>
+				<a class="products" href="/seller/products">Products</a>
+				<a class="reports" href="/seller/reports">Reports</a>
+			</nav>
+		</aside>
+
+		<div class="main-content">
+			<section class="trends card">
+				<div class="section-header">
+					<h3>Summary</h3>
+				</div>
+				<div class="card">
+					<div class="sd-widgets" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+						<div class="card"><div class="small">Total Products Listed</div><div id="total-products" class="metric">0</div></div>
+						<div class="card"><div class="small">Pending Orders</div><div id="pending-orders" class="metric">0</div></div>
+						<div class="card"><div class="small">Completed Orders</div><div id="completed-orders" class="metric">0</div></div>
+					</div>
+				</div>
+			</section>
+
+			<section class="content card">
+				<h3>Notifications</h3>
+				<ul id="notifications-list" class="small">
+					<li>No notifications</li>
+				</ul>
+			</section>
+		</div>
+	</div>
+</body>
+</html>
