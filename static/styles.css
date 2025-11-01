@@ -278,6 +278,167 @@ header {
     transition: opacity 0.3s ease;
 }
 
+
+/* ---------- GLOBAL FONT ---------- */
+
+body,
+h1,
+h2,
+h3,
+p,
+a,
+button,
+input,
+label {
+    font-family: "Poppins", sans-serif;
+}
+
+
+/* ---------- ABOUT US SECTION ---------- */
+
+.about-section {
+    background-color: #ffffff;
+    padding: 80px 20px;
+}
+
+.about-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    gap: 40px;
+}
+
+.about-text {
+    flex: 1 1 450px;
+    text-align: left;
+}
+
+.about-text h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #5682B1;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.about-text p {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.about-image {
+    flex: 1 1 400px;
+    text-align: center;
+}
+
+.about-image img {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.about-image img:hover {
+    transform: scale(1.03);
+}
+
+
+/* ---------- APPLY AS A SELLER SECTION ---------- */
+
+.apply-seller {
+    background: #f6f9f6;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.apply-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.apply-seller h2 {
+    font-size: 2rem;
+    color: #5682B1;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.apply-seller p {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+.apply-btn {
+    display: inline-block;
+    background-color: #5682B1;
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px #5682B1;
+}
+
+.apply-btn:hover {
+    background-color: #739EC9;
+    box-shadow: 0 3px 8px #739EC9;
+    transform: translateY(-2px);
+}
+
+
+/* ---------- RESPONSIVE DESIGN ---------- */
+
+@media (max-width: 992px) {
+    .about-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .about-text {
+        text-align: center;
+    }
+    .about-text h2 {
+        font-size: 1.8rem;
+    }
+    .about-text p {
+        font-size: 0.95rem;
+    }
+    .about-image img {
+        max-width: 350px;
+    }
+    .apply-seller h2 {
+        font-size: 1.8rem;
+    }
+    .apply-seller p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .about-section,
+    .apply-seller {
+        padding: 60px 15px;
+    }
+    .about-text h2,
+    .apply-seller h2 {
+        font-size: 1.5rem;
+    }
+    .about-text p,
+    .apply-seller p {
+        font-size: 0.9rem;
+    }
+    .apply-btn {
+        padding: 10px 22px;
+        font-size: 0.95rem;
+    }
+}
+
 .footer {
     background-color: #FFE8DB;
     color: black;

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Apply as a Seller | HarayaHomes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='SellerApplications/SellerApplications.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="apply-wrapper">
+        <div class="apply-card">
+            <h2>Become a HarayaHomes Seller</h2>
+            <p class="subtext">Ready to grow your home & garden business? Join our trusted community of Filipino sellers and reach more customers nationwide!</p>
+            <a href="{{ url_for('index') }}" class="back-home-btn">← Back to Home</a>
+            <form action="{{ url_for('apply') }}" method="POST" enctype="multipart/form-data">
+
+                <!-- Business Info -->
+                <h3 class="section-title">Business Information</h3>
+
+                <label for="store_name">Shop Name</label>
+                <input type="text" id="store_name" name="store_name" placeholder="Enter your shop name" required>
+
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+
+
+                <label for="phone">Mobile Number</label>
+                <input type="text" id="phone" name="phone" placeholder="09XXXXXXXXX" required>
+
+                <label for="category">Main Product Category</label>
+                <select id="category" name="product_category" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Home_Decor">Home Decor</option>
+                    <option value="Kitchen_Dining">Kitchen & Dining</option>
+                    <option value="Home_Improvement">Home Improvement</option>
+                    <option value="Garden_Outdoor">Garden & Outdoor</option>
+                    <option value="Bedding_Bath">Bedding & Bath</option>
+                    <option value="Cleaning_Storage">Cleaning & Storage</option>
+                    <option value="Pet_Supplies">Pet Supplies</option>
+                </select>
+
+                <!-- Address Section -->
+                <h3 class="section-title">Pickup Address</h3>
+
+                <label>Region / Province / City / Barangay</label>
+                <div class="address-group">
+                    <select id="region" name="region" required>
+                        <option disabled selected>Select Region</option>
+                    </select>
+                    <select id="province" name="province" required>
+                        <option disabled selected>Select Province</option>
+                    </select>
+                    <select id="city" name="city" required>
+                        <option disabled selected>Select City / Municipality</option>
+                    </select>
+                    <select id="barangay" name="barangay" required>
+                        <option disabled selected>Select Barangay</option>
+                    </select>
+                </div>
+
+                <label for="exact_address">Complete Address</label>
+                <input type="text" id="exact_address" name="exact_address" placeholder="House No., Street, Subdivision, Building, etc." required>
+
+                <!-- Document Upload -->
+                <h3 class="section-title">Verification Documents</h3>
+
+                <label for="valid_id">Valid ID</label>
+                <input type="file" id="valid_id" name="valid_id" accept=".pdf, .jpg, .jpeg, .png" required>
+
+                <label for="document">Business Permit / Supporting Document</label>
+                <input type="file" id="document" name="document" accept=".pdf, .jpg, .jpeg, .png" required>
+
+
+                <button type="submit">Submit Application</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Philippine address data -->
+    <script src="{{ url_for('static', filename='SellerApplications/SellerApplications.js') }}"></script>
+</body>
+
+</html>

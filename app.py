@@ -3,9 +3,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
 from functools import wraps
+from flask import Flask, render_template, request, redirect, url_for, flash
+import mysql.connector
+import os
+from flask import Flask, request, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 app.secret_key = "harayahomes_secret_key"
+app.config['UPLOAD_FOLDER'] = 'static/uploads'  # Folder to save uploads
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB limit
+
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def get_db_connection():
     return mysql.connector.connect(
@@ -983,6 +997,91 @@ def api_archived_users():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+@app.route("/apply", methods=["GET", "POST"])
+def apply():
+    if request.method == "POST":
+        conn = cursor = None
+        try:
+            user_id = session.get("user_id")
+
+            # Form data
+            store_name = request.form.get("store_name")
+            phone_number = request.form.get("phone")
+            email = request.form.get("email")
+            region = request.form.get("region")
+            province = request.form.get("province")
+            city = request.form.get("city")
+            barangay = request.form.get("barangay")
+            exact_address = request.form.get("exact_address")
+            product_category = request.form.get("product_category")
+            full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}"
+
+            # Files
+            valid_id_file = request.files.get("valid_id")
+            document_file = request.files.get("document")
+
+            # Top-level Applications folder
+            applications_folder = os.path.join("static", "uploads", "Applications")
+            os.makedirs(applications_folder, exist_ok=True)
+
+            # Applicant folder inside Applications
+            applicant_folder = os.path.join(applications_folder, store_name.replace(" ", "_"))
+            valid_id_folder = os.path.join(applicant_folder, "Valid_IDs")
+            document_folder = os.path.join(applicant_folder, "Business_Docs")
+            os.makedirs(valid_id_folder, exist_ok=True)
+            os.makedirs(document_folder, exist_ok=True)
+
+            # Helper function to save files
+            def save_file(file, folder, prefix):
+                if not file or not allowed_file(file.filename):
+                    raise ValueError(f"Invalid {prefix} file type. Only PDF, JPG, PNG allowed.")
+                
+                file.seek(0, os.SEEK_END)
+                size = file.tell()
+                file.seek(0)
+
+                if size > app.config['MAX_CONTENT_LENGTH']:
+                    raise ValueError(f"{prefix} file must be 5MB or less.")
+
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"{prefix}.{ext}")
+                path = os.path.join(folder, filename)
+                file.save(path)
+                return path
+
+            # Save files into respective folders
+            valid_id_path = save_file(valid_id_file, valid_id_folder, "valid_id")
+            document_path = save_file(document_file, document_folder, "document")
+
+            # Insert into database
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            sql = """
+                INSERT INTO sellerapplications 
+                (user_id, store_name, PhoneNumber, Email, Address, Product_Category, valid_id_path, document_path, Approval)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            """
+            values = (user_id, store_name, phone_number, email, full_address, product_category, valid_id_path, document_path)
+            cursor.execute(sql, values)
+            conn.commit()
+
+            return render_template("SellerApplications/SellerApplications.html", application_success=True)
+
+        except ValueError as ve:
+            flash(str(ve), "error")
+            return redirect(url_for("apply"))
+        except Exception as e:
+            print("Error submitting seller application:", e)
+            flash("An error occurred while submitting your application. Please try again.", "error")
+            return redirect(url_for("apply"))
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+    return render_template("SellerApplications/SellerApplications.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
