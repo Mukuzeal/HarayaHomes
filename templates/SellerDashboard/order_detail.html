@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Order Detail</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header>
+		<div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div>
+		<nav class="top-nav"><a class="notification" href="#"><i class="fas fa-bell"></i></a></nav>
+	</header>
+
+	<div class="container">
+		<aside class="sidebar">
+			<nav class="sidebar-nav">
+				<a href="/seller">Overview</a>
+				<a href="/seller/orders" class="dashboard active">Orders</a>
+				<a href="/seller/products">Products</a>
+			</nav>
+		</aside>
+
+		<div class="main-content">
+			<main class="content card">
+				<div class="section-header">
+					<h3>Order #<span id="order-id">...</span></h3>
+					<div class="actions-inline">
+						<button class="btn" id="accept-order">Accept</button>
+						<button class="btn btn-outline" id="decline-order">Decline</button>
+					</div>
+				</div>
+
+				<section class="card">
+					<div><strong>Buyer:</strong> <span id="buyer-name"></span></div>
+					<div><strong>Items:</strong><ul id="order-items"></ul></div>
+					<div><strong>Total:</strong> <span id="order-total"></span></div>
+				</section>
+
+				<section class="card" style="margin-top:12px">
+					<label>Assign Rider:
+						<select class="input" id="assign-rider"><option value="">Select Rider</option></select>
+					</label>
+					<label>Update Status:
+						<select class="input" id="update-status"><option>Preparing</option><option>Packed</option><option>Shipped</option><option>In Transit</option><option>Delivered</option><option>Completed</option></select>
+					</label>
+					<button class="btn" id="save-status">Save Status</button>
+				</section>
+
+				<section class="card" style="margin-top:12px">
+					<h4>Payment</h4>
+					<div>Product Price: <span id="payment-product-price"></span></div>
+					<div>Commission: <span id="payment-commission"></span></div>
+					<div>Net Earnings: <span id="payment-net"></span></div>
+					<button class="btn" id="mark-paid">Mark as Paid</button>
+				</section>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
