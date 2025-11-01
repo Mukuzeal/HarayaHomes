@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Add / Edit Product</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+</head>
+<body>
+	<header>
+		<div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div>
+		<nav class="top-nav"><a class="notification" href="#"><i class="fas fa-bell"></i></a></nav>
+	</header>
+
+	<div class="container">
+		<aside class="sidebar"><nav class="sidebar-nav"><a href="/seller/products" class="products active">Products</a></nav></aside>
+
+		<div class="main-content">
+			<main class="content card">
+				<div class="section-header"><h3>Add / Edit Product</h3></div>
+				<form id="product-form">
+					<label>Product Name: <input class="input" name="name" required></label>
+					<label>Category: <input class="input" name="category"></label>
+					<label>Description: <textarea class="input" name="description"></textarea></label>
+					<label>Price: <input class="input" type="number" name="price" step="0.01"></label>
+					<label>Stock Quantity: <input class="input" type="number" name="stock"></label>
+					<label>Product Images: <input class="input" type="file" name="images" multiple></label>
+					<div style="margin-top:12px">
+						<button class="btn" type="submit">Save & Publish</button>
+						<button class="btn btn-outline" type="button" onclick="history.back()">Cancel</button>
+					</div>
+				</form>
+			</main>
+		</div>
+	</div>
+</body>
+</html>
