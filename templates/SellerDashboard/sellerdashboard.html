@@ -7,7 +7,11 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
+
 	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+
+	<!-- ADDED: Seller JS controls order modal / actions. Without this the "View" button won't work. -->
+	<script src="{{ url_for('static', filename='SellerDashboard/js/seller.js') }}" defer></script>
 </head>
 <body>
 	<header>
@@ -77,7 +81,8 @@
 			<main class="content card">
 				<h3>Recent Activities</h3>
 				<ul id="activities-list" class="small">
-					<li>No recent activities</li>
+					<li><a href="/seller/orders">New order received — ORD-000123</a> <button class="btn btn-sm" onclick="location.href='/seller/orders'">View</button></li>
+					<li><a href="/seller/products">Product updated — Classic Lamp</a> <button class="btn btn-sm" onclick="location.href='/seller/products'">Edit</button></li>
 				</ul>
 			</main>
 		</div>
