@@ -37,6 +37,19 @@
 					<tbody id="payments-table-body"><tr><td colspan="7" class="small">No payments yet</td></tr></tbody>
 				</table>
 			</main>
+
+			<!-- Payment confirm modal -->
+			<div id="modal-payment" class="modal" style="display:none;">
+				<div class="modal-backdrop"></div>
+				<div class="modal-panel card" role="dialog" aria-modal="true">
+					<h4>Confirm Payment</h4>
+					<p id="modal-payment-body">Mark selected order as paid?</p>
+					<div style="margin-top:12px">
+						<button class="btn" id="modal-payment-yes">Yes</button>
+						<button class="btn btn-outline" id="modal-payment-no">No</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
