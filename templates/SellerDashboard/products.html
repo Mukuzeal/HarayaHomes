@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
 	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='sellerdashboard/sellerdashboard.js') }}" defer></script>
 </head>
 <body>
 	<header>
@@ -29,16 +30,153 @@
 				<div class="section-header">
 					<h3>Products</h3>
 					<div class="actions-inline">
-						<button class="btn" onclick="location.href='product_form.html'">Add Product</button>
+						<button class="btn" id="open-add-product">Add Product</button>
 					</div>
 				</div>
 
+				<!-- NEW: toolbar for search and category filter -->
+				<div class="toolbar">
+					<div>
+						<input class="input" id="search-products" placeholder="Search products...">
+						<select class="input" id="filter-category">
+							<option value="">All categories</option>
+							<option>Kitchen Appliances</option>
+							<option>Furniture & Decor</option>
+							<option>Gardening Tools</option>
+							<option>Outdoor Living</option>
+							<option>Home Improvement Tools</option>
+							<option>Bedding & Bath</option>
+						</select>
+						<button class="btn btn-outline" id="apply-product-filters">Filter</button>
+					</div>
+				</div>
+
+				<!-- Updated products table: Actions column with Edit / Archive / Delete -->
 				<table class="table">
 					<thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
-					<tbody id="products-table-body"><tr><td colspan="6" class="small">No products</td></tr></tbody>
+					<tbody id="products-table-body">
+						<tr><td colspan="6" class="small">No products</td></tr>
+					</tbody>
 				</table>
 			</main>
+
+			<!-- Modal: Add / Edit Product (embedded full form) -->
+			<div id="modal-product" class="modal" aria-hidden="true" style="display:none;">
+				<div class="modal-backdrop"></div>
+				<div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="modal-product-title">
+					<header class="modal-header">
+						<h3 id="modal-product-title">Add Product</h3>
+						<button class="modal-close" id="modal-product-close" aria-label="Close">&times;</button>
+					</header>
+
+					<form id="modal-product-form" class="modal-form" enctype="multipart/form-data">
+						<input type="hidden" id="modal-product-id" name="id">
+
+						<label>Product Name:
+							<input class="input" id="modal-product-name" name="name" required>
+						</label>
+
+						<label>Category:
+							<select class="input" id="modal-product-category" name="category" required>
+								<option value="">Select category</option>
+								<option>Kitchen Appliances</option>
+								<option>Furniture & Decor</option>
+								<option>Gardening Tools</option>
+								<option>Outdoor Living</option>
+								<option>Home Improvement Tools</option>
+								<option>Bedding & Bath</option>
+							</select>
+						</label>
+
+						<label>Description:
+							<textarea class="input" id="modal-product-desc" name="description" rows="4"></textarea>
+						</label>
+
+						<label>Price:
+							<input class="input" id="modal-product-price" name="price" type="number" step="0.01" required>
+						</label>
+
+						<label>Stock Quantity:
+							<input class="input" id="modal-product-stock" name="stock" type="number" required>
+						</label>
+
+						<label>Product Images:
+							<input class="input" id="modal-product-images" name="images" type="file" accept="image/*" multiple>
+						</label>
+
+						<div class="form-actions" style="margin-top:12px">
+							<button class="btn" type="submit" id="modal-product-save">Save & Publish</button>
+							<button class="btn btn-outline" type="button" id="modal-product-cancel">Cancel</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<!-- NEW: Delete / Archive confirmation modal -->
+			<div id="modal-confirm" class="modal" style="display:none;">
+				<div class="modal-backdrop"></div>
+				<div class="modal-panel card" role="dialog" aria-modal="true">
+					<h4 id="modal-confirm-title">Confirm</h4>
+					<p id="modal-confirm-body">Are you sure?</p>
+					<div style="margin-top:12px">
+						<button class="btn" id="modal-confirm-yes">Yes</button>
+						<button class="btn btn-outline" id="modal-confirm-no">No</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
+
+	<script>
+		// Minimal modal toggle handlers — replace/extend with your seller JS if needed
+		(function(){
+			const modal = document.getElementById('modal-product');
+			const openBtn = document.getElementById('open-add-product');
+			const closeBtn = document.getElementById('modal-product-close');
+			const cancelBtn = document.getElementById('modal-product-cancel');
+			const form = document.getElementById('modal-product-form');
+
+			function openModal(mode='add', data=null){
+				document.getElementById('modal-product-title').textContent = mode === 'edit' ? 'Edit Product' : 'Add Product';
+				if(mode === 'edit' && data){
+					// populate fields quickly (extend as needed)
+					document.getElementById('modal-product-id').value = data.id || '';
+					document.getElementById('modal-product-name').value = data.name || '';
+					document.getElementById('modal-product-category').value = data.category || '';
+					document.getElementById('modal-product-desc').value = data.description || '';
+					document.getElementById('modal-product-price').value = data.price || '';
+					document.getElementById('modal-product-stock').value = data.stock || '';
+				} else {
+					form.reset();
+					document.getElementById('modal-product-id').value = '';
+				}
+				modal.style.display = 'block';
+				modal.setAttribute('aria-hidden','false');
+			}
+
+			function closeModal(){
+				modal.style.display = 'none';
+				modal.setAttribute('aria-hidden','true');
+			}
+
+			openBtn.addEventListener('click', function(){ openModal('add'); });
+			closeBtn.addEventListener('click', closeModal);
+			cancelBtn.addEventListener('click', closeModal);
+
+			form.addEventListener('submit', function(e){
+				e.preventDefault();
+				// minimal client-side handling — replace with your API call or seller JS
+				const formData = new FormData(form);
+				// Example: send via fetch to your endpoint (uncomment/adjust as needed)
+				// fetch('/seller/api/products', { method: 'POST', body: formData }).then(...)
+
+				// close for now
+				closeModal();
+			});
+
+			// expose openModal for other scripts if needed
+			window.productModal = { open: openModal, close: closeModal };
+		})();
+	</script>
 </body>
 </html>
