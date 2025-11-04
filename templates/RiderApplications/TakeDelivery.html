@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haraya Haul – Take Delivery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='RiderApplications/TakeDelivery.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Haraya <span>Haul</span></h2>
+            </div>
+            <nav class="menu">
+                <a href="/RiderDashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/RiderDelivery"><i class="fas fa-box"></i> Deliveries</a>
+                <a href="#"><i class="fas fa-money-bill"></i> Earnings</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <header class="topbar">
+                <h1>Available Deliveries</h1>
+                <div class="top-icons">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-cog"></i>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="delivery-header">
+                    <button class="take-delivery-btn" onclick="window.location.href='/RiderDelivery'">
+                        <i class=""></i> Back to Deliveries
+                    </button>
+                </div>
+
+                <table class="delivery-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Delivery Address</th>
+                            <th>Payment Type</th>
+                            <th>Package Info</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deliveryList">
+                        <tr>
+                            <td>#ORD-2025-005</td>
+                            <td>Angela Dizon</td>
+                            <td><a href="https://maps.google.com/?q=Biñan+Laguna" target="_blank">Biñan, Laguna</a></td>
+                            <td>COD</td>
+                            <td>Small box - 1.5kg</td>
+                            <td>
+                                <button class="take-btn" onclick="takeDelivery(this)"><i class="fas fa-hand"></i> Take Delivery</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>#ORD-2025-006</td>
+                            <td>Rico Navarro</td>
+                            <td><a href="https://maps.google.com/?q=Los+Baños+Laguna" target="_blank">Los Baños, Laguna</a></td>
+                            <td>Paid Online</td>
+                            <td>Medium parcel - 3kg</td>
+                            <td>
+                                <button class="take-btn" onclick="takeDelivery(this)"><i class="fas fa-hand"></i> Take Delivery</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function takeDelivery(button) {
+            const row = button.closest("tr");
+            row.style.transition = "opacity 0.4s ease";
+            row.style.opacity = "0";
+            setTimeout(() => {
+                row.remove();
+                alert("Delivery successfully taken! It has been assigned to you.");
+            }, 400);
+        }
+    </script>
+</body>
+
+</html>

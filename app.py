@@ -997,6 +997,7 @@ def api_archived_users():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
 @app.route("/apply", methods=["GET", "POST"])
 def apply():
     if request.method == "POST":
@@ -1008,13 +1009,14 @@ def apply():
             store_name = request.form.get("store_name")
             phone_number = request.form.get("phone")
             email = request.form.get("email")
-            region = request.form.get("region")
-            province = request.form.get("province")
-            city = request.form.get("city")
-            barangay = request.form.get("barangay")
+            region = request.form.get("region_name")
+            province = request.form.get("province_name")
+            city = request.form.get("city_name")
+            barangay = request.form.get("barangay_name")
             exact_address = request.form.get("exact_address")
+            zip_code = request.form.get("zip_code")
             product_category = request.form.get("product_category")
-            full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}"
+            full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
 
             # Files
             valid_id_file = request.files.get("valid_id")
@@ -1081,6 +1083,148 @@ def apply():
                 conn.close()
 
     return render_template("SellerApplications/SellerApplications.html")
+
+@app.route("/RiderApply", methods=["GET", "POST"])
+def RiderApply():
+    if request.method == "POST":
+        conn = cursor = None
+        print("DEBUG: RiderApply POST request received")
+
+        try:
+            user_id = session.get("user_id")
+            print("DEBUG: Session user_id =", user_id)
+
+            # --- Form Data ---
+            first_name = request.form.get("first_name")
+            last_name = request.form.get("last_name")
+            birthday = request.form.get("birthday")
+            age = request.form.get("age")
+            gender = request.form.get("gender")
+            contact_number = request.form.get("contact_number")
+            email = request.form.get("email")
+            region = request.form.get("region_name")
+            province = request.form.get("province_name")
+            city = request.form.get("city_name")
+            barangay = request.form.get("barangay_name")
+            exact_address = request.form.get("exact_address")
+            zip_code = request.form.get("zip_code")
+
+            address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
+
+            vehicle_type = request.form.get("vehicle_type")
+            vehicle_model = request.form.get("vehicle_model")
+            plate_number = request.form.get("plate_number")
+
+            print("DEBUG: Form data collected successfully")
+
+            # --- File Uploads ---
+            vehicle_front = request.files.get("vehicle_front")
+            vehicle_back = request.files.get("vehicle_back")
+            valid_id = request.files.get("valid_id")
+            license = request.files.get("license")
+            orcr = request.files.get("orcr")
+            print("DEBUG: Files received:", {
+                "vehicle_front": bool(vehicle_front),
+                "vehicle_back": bool(vehicle_back),
+                "valid_id": bool(valid_id),
+                "license": bool(license),
+                "orcr": bool(orcr),
+            })
+
+            # --- Folder Setup ---
+            rider_folder = os.path.join("static", "uploads", "RiderApplications", f"{first_name}_{last_name}")
+            os.makedirs(rider_folder, exist_ok=True)
+            folders = {
+                "vehicle": os.path.join(rider_folder, "Vehicle"),
+                "ids": os.path.join(rider_folder, "Valid_IDs"),
+                "license": os.path.join(rider_folder, "Licenses"),
+                "orcr": os.path.join(rider_folder, "ORCR")
+            }
+            for path in folders.values():
+                os.makedirs(path, exist_ok=True)
+
+            def save_file(file, folder, prefix):
+                if not file or not allowed_file(file.filename):
+                    raise ValueError(f"Invalid {prefix} file type. Only PDF, JPG, PNG allowed.")
+                file.seek(0, os.SEEK_END)
+                size = file.tell()
+                file.seek(0)
+                if size > app.config['MAX_CONTENT_LENGTH']:
+                    raise ValueError(f"{prefix} file must be 5MB or less.")
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"{prefix}.{ext}")
+                path = os.path.join(folder, filename)
+                file.save(path)
+                print(f"DEBUG: Saved file {prefix} at {path}")
+                return path
+
+            # --- Save Uploaded Files ---
+            vehicle_front_path = save_file(vehicle_front, folders["vehicle"], "vehicle_front")
+            vehicle_back_path = save_file(vehicle_back, folders["vehicle"], "vehicle_back")
+            valid_id_path = save_file(valid_id, folders["ids"], "valid_id")
+            license_path = save_file(license, folders["license"], "license")
+            orcr_path = save_file(orcr, folders["orcr"], "orcr_upload")
+
+            print("DEBUG: All files saved successfully")
+
+            # --- Database Insertion ---
+            conn = get_db_connection()
+            print("DEBUG: Database connection established")
+            cursor = conn.cursor()
+
+            sql = """
+                INSERT INTO riderapplication
+                (user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                vehicle_type, vehicle_model, plate_number, vehicle_front_path, vehicle_back_path,
+                valid_id_path, license_path, orcr_upload_path, Approval)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending')
+            """
+
+            values = (
+                user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                vehicle_type, vehicle_model, plate_number,
+                vehicle_front_path, vehicle_back_path, valid_id_path, license_path, orcr_path
+            )
+
+            cursor.execute(sql, values)
+            conn.commit()
+            print("DEBUG: Database insert committed successfully")
+
+            flash("Rider registration submitted successfully!", "success")
+            return render_template("RiderApplications/RiderRegistration.html", application_success=True)
+
+        except ValueError as ve:
+            print("DEBUG ERROR (ValueError):", ve)
+            flash(str(ve), "error")
+            return redirect(url_for("RiderApply"))
+        except Exception as e:
+            import traceback
+            print("DEBUG ERROR (Exception):", e)
+            traceback.print_exc()
+            flash("An error occurred while submitting your application. Please try again.", "error")
+            return redirect(url_for("RiderApply"))
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+                print("DEBUG: Database connection closed")
+
+    return render_template("RiderApplications/RiderRegistration.html")
+
+
+
+@app.route("/RiderDashboard", methods=["GET", "POST"])
+def RiderDashboard():
+    return render_template("RiderApplications/RiderDashboard.html")
+
+@app.route("/RiderDelivery", methods=["GET", "POST"])
+def RiderDelivery():
+    return render_template("RiderApplications/RiderDelivery.html")
+
+@app.route("/TakeDelivery", methods=["GET", "POST"])
+def TakeDelivery():
+    return render_template("RiderApplications/TakeDelivery.html")
 
 
 @app.route("/seller")

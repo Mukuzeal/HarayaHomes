@@ -393,6 +393,56 @@ label {
 }
 
 
+/* ---------- APPLY AS A RIDER SECTION ---------- */
+
+.apply-rider {
+    background: #f6f9f6;
+    /* soft peach background (matches theme) */
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.apply-rider .apply-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.apply-rider h2 {
+    font-size: 2rem;
+    color: #5682B1;
+    /* dark espresso brown text */
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.apply-rider p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #151111;
+    margin-bottom: 30px;
+}
+
+.apply-rider .apply-btn {
+    display: inline-block;
+    background-color: #5682B1;
+    /* blue accent */
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px #5682B1;
+}
+
+.apply-rider .apply-btn:hover {
+    background-color: #739EC9;
+    /* lighter blue on hover */
+    box-shadow: 0 3px 8px #739EC9;
+    transform: translateY(-2px);
+}
+
+
 /* ---------- RESPONSIVE DESIGN ---------- */
 
 @media (max-width: 992px) {

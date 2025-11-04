@@ -1,10 +1,32 @@
-document.addEventListener("DOMContentLoaded", async() => {
+document.addEventListener("DOMContentLoaded", async () => {
     const regionSelect = document.getElementById("region");
     const provinceSelect = document.getElementById("province");
     const citySelect = document.getElementById("city");
     const barangaySelect = document.getElementById("barangay");
+    const form = document.querySelector("form");
 
-    // Fetch JSON data from static folder
+    // Create hidden inputs to store human-readable names
+    const regionNameInput = document.createElement("input");
+    regionNameInput.type = "hidden";
+    regionNameInput.name = "region_name";
+    form.appendChild(regionNameInput);
+
+    const provinceNameInput = document.createElement("input");
+    provinceNameInput.type = "hidden";
+    provinceNameInput.name = "province_name";
+    form.appendChild(provinceNameInput);
+
+    const cityNameInput = document.createElement("input");
+    cityNameInput.type = "hidden";
+    cityNameInput.name = "city_name";
+    form.appendChild(cityNameInput);
+
+    const barangayNameInput = document.createElement("input");
+    barangayNameInput.type = "hidden";
+    barangayNameInput.name = "barangay_name";
+    form.appendChild(barangayNameInput);
+
+    // Fetch address data
     const regions = await fetch("/static/philippine-addresses/region.json").then(r => r.json());
     const provinces = await fetch("/static/philippine-addresses/province.json").then(r => r.json());
     const cities = await fetch("/static/philippine-addresses/city.json").then(r => r.json());
@@ -22,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     // Region → Province
     regionSelect.addEventListener("change", () => {
         const selectedRegion = regionSelect.value;
+        regionNameInput.value = regions.find(r => r.region_code === selectedRegion)?.region_name || "";
         provinceSelect.innerHTML = '<option disabled selected>Select Province</option>';
         citySelect.innerHTML = '<option disabled selected>Select City</option>';
         barangaySelect.innerHTML = '<option disabled selected>Select Barangay</option>';
@@ -38,6 +61,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     // Province → City
     provinceSelect.addEventListener("change", () => {
         const selectedProvince = provinceSelect.value;
+        provinceNameInput.value = provinces.find(p => p.province_code === selectedProvince)?.province_name || "";
         citySelect.innerHTML = '<option disabled selected>Select City</option>';
         barangaySelect.innerHTML = '<option disabled selected>Select Barangay</option>';
 
@@ -53,6 +77,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     // City → Barangay
     citySelect.addEventListener("change", () => {
         const selectedCity = citySelect.value;
+        cityNameInput.value = cities.find(c => c.city_code === selectedCity)?.city_name || "";
         barangaySelect.innerHTML = '<option disabled selected>Select Barangay</option>';
 
         const filteredBarangays = barangays.filter(b => b.city_code === selectedCity);
@@ -63,7 +88,24 @@ document.addEventListener("DOMContentLoaded", async() => {
             barangaySelect.appendChild(option);
         });
     });
+
+    barangaySelect.addEventListener("change", () => {
+        const selectedBarangay = barangaySelect.value;
+        barangayNameInput.value = barangays.find(b => b.brgy_code === selectedBarangay)?.brgy_name || "";
+    });
+
+    // ✅ Before submission, use names instead of numeric codes
+    form.addEventListener("submit", () => {
+        // Replace select name attributes with readable name equivalents
+        regionSelect.name = "region_code";
+        provinceSelect.name = "province_code";
+        citySelect.name = "city_code";
+        barangaySelect.name = "barangay_code";
+    });
 });
+
+
+
 
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 
