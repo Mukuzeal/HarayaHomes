@@ -151,7 +151,7 @@ DROP TABLE IF EXISTS `seller`;
 CREATE TABLE `seller` (
   `Seller_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `ShopName` int(11) NOT NULL,
+  `ShopName` varchar(255) NOT NULL,
   PRIMARY KEY (`Seller_id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -171,6 +171,11 @@ CREATE TABLE `sellerapplications` (
   `valid_id_path` varchar(255) NOT NULL,
   `document_path` varchar(255) NOT NULL,
   `Approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `region` varchar(255) NOT NULL,
+  `province` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `barangay` varchar(255) NOT NULL,
+  `exact_address` varchar(255) NOT NULL,
   PRIMARY KEY (`application_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `sellerapplications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
