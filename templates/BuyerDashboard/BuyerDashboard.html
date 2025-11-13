@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>HarayaHomes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='BuyerDashboard/BuyerDashboard.css') }}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- HEADER / NAVBAR -->
+    <header>
+        <a class="logo" href="/">
+            <p id="Haraya">
+                <span class="baybayin">HarayaHomes</span>
+                <span class="montserrat">HarayaHomes</span>
+            </p>
+        </a>
+
+        <nav class="navbar">
+            <ul class="nav__links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#about">Cart</a></li>
+                <li><a href="#apply">Orders</a></li>
+            </ul>
+
+            <div class="nav-search">
+                <input type="text" placeholder="Search products...">
+                <button><i class="fa fa-search"></i></button>
+            </div>
+
+            <a class="cta" href="#">Profile</a>
+            <p class="menu cta">Menu</p>
+        </nav>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <div id="mobile__menu" class="overlay">
+        <a class="close">&times;</a>
+        <div class="overlay__content">
+            <a href="#hero">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#apply">Apply as a Seller</a>
+            <a href="#rider">Apply as a Rider</a>
+            <a href="/login">Log-in</a>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1>HarayaHomes</h1>
+            <p>The Filipino Marketplace for Home Essentials & Garden Living</p>
+        </div>
+    </section>
+
+    <!-- PRODUCT GRID -->
+    <section class="product-grid">
+        <div class="product-card">
+            <img src="https://via.placeholder.com/200" alt="Wireless Mouse">
+            <h3>Wireless Mouse</h3>
+            <p>₱500</p>
+            <button>Add to Cart</button>
+        </div>
+        <div class="product-card">
+            <img src="https://via.placeholder.com/200" alt="Headphones">
+            <h3>Headphones</h3>
+            <p>₱1200</p>
+            <button>Add to Cart</button>
+        </div>
+        <div class="product-card">
+            <img src="https://via.placeholder.com/200" alt="Keyboard">
+            <h3>Keyboard</h3>
+            <p>₱800</p>
+            <button>Add to Cart</button>
+        </div>
+        <div class="product-card">
+            <img src="https://via.placeholder.com/200" alt="Smartwatch">
+            <h3>Smartwatch</h3>
+            <p>₱3500</p>
+            <button>Add to Cart</button>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 HarayaHomes. All rights reserved.</p>
+            <p>DISCLAIMER: This Website is a Group Project.</p>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script type="text/javascript" src="static/mobile.js"></script>
+</body>
+
+</html>

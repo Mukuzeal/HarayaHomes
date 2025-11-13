@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarayaHomes- Add Product</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='SellerDashboard/addproducts.css') }}">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+    <div class="logo">
+      <h2>HarayaHomes</h2>
+    </div>
+
+      <nav class="menu">
+      <a href="/sellerdashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+
+      <!-- Manage Products Dropdown -->
+      <p class="menu-section dropdown-btn">🛍️ Manage Products <i class="fas fa-caret-down"></i></p>
+      <div class="dropdown-container">
+        <a href="/addproducts"><i class="fas fa-plus-circle"></i> Add Product</a>
+        <a href="#"><i class="fas fa-pen-to-square"></i> Edit Product</a>
+        <a href="#"><i class="fas fa-box-archive"></i> Archive / Unarchive</a>
+        <a href="#"><i class="fas fa-trash"></i> Delete Product</a>
+        <a href="#"><i class="fas fa-list"></i> Product List</a>
+      </div>
+
+      <!-- Orders Dropdown -->
+      <p class="menu-section dropdown-btn">📦 Orders <i class="fas fa-caret-down"></i></p>
+      <div class="dropdown-container">
+        <a href="#"><i class="fas fa-eye"></i> View Orders</a>
+        <a href="#"><i class="fas fa-check-circle"></i> Confirm Orders</a>
+        <a href="#"><i class="fas fa-spinner"></i> Update Status</a>
+        <a href="#"><i class="fas fa-receipt"></i> Order Details</a>
+        <a href="#"><i class="fas fa-chart-bar"></i> Sales Reports</a>
+      </div>
+
+      <!-- Account Dropdown -->
+      <p class="menu-section dropdown-btn">👤 Applications / Account <i class="fas fa-caret-down"></i></p>
+      <div class="dropdown-container">
+        <a href="#"><i class="fas fa-user-plus"></i> Apply for Account</a>
+        <a href="#"><i class="fas fa-hourglass-half"></i> Application Status</a>
+        <a href="#"><i class="fas fa-user-gear"></i> Edit Profile</a>
+        <a href="#"><i class="fas fa-right-from-bracket"></i> Logout</a>
+      </div>
+
+      <!-- Reports / Analytics Dropdown -->
+      <p class="menu-section dropdown-btn">📊 Reports / Analytics <i class="fas fa-caret-down"></i></p>
+      <div class="dropdown-container">
+        <a href="#"><i class="fas fa-chart-pie"></i> Sales Report</a>
+        <a href="#"><i class="fas fa-box-open"></i> Product Status</a>
+        <a href="#"><i class="fas fa-credit-card"></i> Payment Reports</a>
+      </div>
+
+      <!-- Payments Dropdown -->
+      <p class="menu-section dropdown-btn">💰 Payments <i class="fas fa-caret-down"></i></p>
+      <div class="dropdown-container">
+        <a href="#"><i class="fas fa-money-bill-trend-up"></i> Received Payments</a>
+        <a href="#"><i class="fas fa-clock"></i> Pending Payments</a>
+        <a href="#"><i class="fas fa-file-invoice-dollar"></i> Transaction History</a>
+      </div>
+    </nav>
+  </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <nav class="navbar">
+        <h1>Adding Products</h1>
+        <div class="nav-right">
+            <div class="icon notification"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+            <div class="icon profile"><i class="fas fa-user-circle"></i></div>
+            <div class="icon setting"><i class="fas fa-cog"></i></div>
+        </div>
+        </nav>
+
+        <section class="form-section">
+            <form action="/SellerAddProduct" method="POST" enctype="multipart/form-data" class="product-form">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-tag"></i> Product Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter product name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category"><i class="fas fa-list"></i> Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select category</option>
+                        <option>Food & Beverage</option>
+                        <option>Home Essentials</option>
+                        <option>Fashion</option>
+                        <option>Electronics</option>
+                        <option>Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="price"><i class="fas fa-peso-sign"></i> Price</label>
+                    <input type="number" id="price" name="price" step="0.01" placeholder="Enter price" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock"><i class="fas fa-boxes"></i> Stock Quantity</label>
+                    <input type="number" id="stock" name="stock" placeholder="Enter stock quantity" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Enter product description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="image"><i class="fas fa-image"></i> Product Image</label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add Product</button>
+                    <button type="reset" class="btn-secondary"><i class="fas fa-undo"></i> Reset</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</body>
+    <script src="{{ url_for('static', filename='SellerDashboard/addproducts.js') }}"></script>
+
+</html>

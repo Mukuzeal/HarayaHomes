@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* ==== THEME COLORS ==== */
+:root {
+    --primary-blue: #739EC9;
+    --accent-blue: #5682B1;
+    --peach-light: #FFE8DB;
+    --peach-soft: #FFE0D2;
+    --text-dark: #151111;
+    --text-gray: #bababa;
+    --white: #fff;
+}
+
+/* ==== LAYOUT ==== */
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    color: var(--text-dark);
+    background-color: var(--peach-light);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ==== SIDEBAR ==== */
+.sidebar {
+  width: 240px;
+  background: var(--white);
+  padding: 1rem;
+  border-right: 1px solid var(--peach-soft);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.logo h2 {
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 2rem;
+}
+
+.logo span {
+  color: var(--accent-blue);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-section {
+  margin: 1rem 0 0.4rem 1rem;
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+.menu a {
+  text-decoration: none;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.menu a i {
+  color: var(--text-dark);
+}
+
+.menu a:hover,
+.menu a.active {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.menu a:hover i,
+.menu a.active i {
+  color: var(--white);
+}
+
+/* ==== MAIN ==== */
+.main {
+  flex: 1;
+  background-color: var(--peach-soft);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* ==== NAVBAR ==== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--white);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--peach-light);
+}
+
+.navbar h1 {
+  font-size: 1.3rem;
+  color: var(--text-dark);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.icon {
+  font-size: 1.3rem;
+  position: relative;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: 0.2s;
+}
+
+.icon:hover {
+  color: var(--accent-blue);
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background-color: #ff4d4d;
+  color: var(--white);
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  border-radius: 50%;
+}
+
+
+/* ==== FORM SECTION ==== */
+.form-section {
+    padding: 2rem 3rem;
+}
+
+.product-form {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--accent-blue);
+}
+
+.form-group i {
+    margin-right: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    border: 1px solid var(--text-gray);
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(86, 130, 177, 0.2);
+}
+
+/* ==== BUTTONS ==== */
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--accent-blue);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-blue);
+}
+
+.btn-secondary {
+    background-color: var(--peach-light);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background-color: var(--peach-soft);
+}
+
+/* Scrollbar */
+.main::-webkit-scrollbar {
+    width: 8px;
+}
+.main::-webkit-scrollbar-thumb {
+    background-color: var(--accent-blue);
+    border-radius: 6px;
+}
+
+/* DROPDOWN */
+
+.dropdown-container {
+  flex-direction: column;
+  margin-left: 10px; /* slight indent */
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+
+.dropdown-btn {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-btn i {
+  transition: transform 0.3s;
+}
+
+.dropdown-btn.active i {
+  transform: rotate(180deg);
+}

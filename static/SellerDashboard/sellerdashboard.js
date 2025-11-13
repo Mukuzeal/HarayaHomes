@@ -1,6 +1,17 @@
 // Seller dashboard client-side features: products CRUD (localStorage), search/filter, cart, checkout, orders, payments, ratings.
 
 document.addEventListener('DOMContentLoaded', () => {
+
+	const dropdowns = document.querySelectorAll('.dropdown-btn');
+      dropdowns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('active');
+          const container = btn.nextElementSibling;
+          if (!container) return;
+          if (container.style.maxHeight) container.style.maxHeight = null;
+          else container.style.maxHeight = container.scrollHeight + "px";
+        });
+      });
 	// Simple sample catalog (persisted to localStorage)
 	const PROD_KEY = 'sd_products_v1';
 	const CART_KEY = 'sd_cart_v1';
@@ -253,7 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 			alert('Order marked as received. Thank you!');
 		});
+		
 	}
+
 
 	// Order detail page actions (accept/update)
 	document.getElementById('accept-order')?.addEventListener('click', ()=> openModal('modal-order-accept'));
@@ -347,5 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	renderCartIfPresent();
 	renderOrderConfirmationIfPresent();
 	renderOrdersList(); // <-- render orders on the orders page
-	updateCartBadge();
+	updateCartBadge();	
 });
+
+
