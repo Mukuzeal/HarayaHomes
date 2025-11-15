@@ -21,7 +21,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'harayahomes@gmail.com'
-app.config['MAIL_PASSWORD'] = 'gtcs wker caqs pfxo'
+app.config['MAIL_PASSWORD'] = ''
 app.config['MAIL_DEFAULT_SENDER'] = ('Haraya Homes', 'noreply@harayahomes.com')
 
 
@@ -1376,4 +1376,5 @@ def BuyerDashboard():
 
 
 if __name__ == "__main__":
+
     app.run(debug=True)
