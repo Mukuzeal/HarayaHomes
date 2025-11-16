@@ -8,14 +8,34 @@ import mysql.connector
 import os
 from flask import Flask, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from flask_mailman import Mail, EmailMessage
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
 
 
 app = Flask(__name__)
 app.secret_key = "harayahomes_secret_key"
+
+# --- Flask-Mail config ---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'harayahomes@gmail.com'
+app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_DEFAULT_SENDER'] = ('Haraya Homes', 'noreply@harayahomes.com')
+
+
+
+
+mail = Mail(app)
+serializer = URLSafeTimedSerializer(app.secret_key)
+
 app.config['UPLOAD_FOLDER'] = 'static/uploads'  # Folder to save uploads
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB limit
 
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
+
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -65,18 +85,18 @@ def ensure_default_admin():
         if has_username:
             cursor.execute(
                 """
-                INSERT INTO users (username, fname, lname, email, password, role, auth_provider)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO users (username, fname, lname, email, password, role)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                ("admin", "Admin", "User", "admin02@gmail.com", hashed_password, "admin", "local"),
+                ("admin", "Admin", "User", "admin02@gmail.com", hashed_password, "admin",),
             )
         else:
             cursor.execute(
                 """
                 INSERT INTO users (fname, lname, email, password, role, auth_provider)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                ("Admin", "User", "admin02@gmail.com", hashed_password, "admin", "local"),
+                ("Admin", "User", "admin02@gmail.com", hashed_password, "admin"),
             )
 
         conn.commit()
@@ -113,19 +133,18 @@ def login():
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
 
+            # ----- SIGN UP -----
             if action == "signup":
-                if not username or not first_name or not last_name or not email or not password:
+                if not first_name or not last_name or not email or not password:
                     flash("Please fill in all required fields.", "error")
                     return redirect(url_for("login"))
 
                 confirm_password = request.form.get("confirm_password")
 
-                # Check password length
                 if len(password) < 8:
                     flash("Password must be at least 8 characters long.", "error")
                     return redirect(url_for("login"))
 
-                # Check if passwords match
                 if password != confirm_password:
                     flash("Passwords do not match.", "error")
                     return redirect(url_for("login"))
@@ -136,54 +155,21 @@ def login():
                     flash("User with that email already exists!", "error")
                     return redirect(url_for("login"))
 
-                # Insert user (handle schemas without `username` gracefully)
                 hashed_password = generate_password_hash(password)
 
-                cursor.execute("SHOW COLUMNS FROM users LIKE 'username'")
-                has_username = cursor.fetchone() is not None
-
-                cursor.execute("SHOW COLUMNS FROM users LIKE 'is_archived'")
-                has_is_archived = cursor.fetchone() is not None
-
-                if has_username and has_is_archived:
-                    cursor.execute(
-                        """
-                        INSERT INTO users (username, fname, lname, email, password, role, auth_provider, is_archived)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, 'Not_Archived')
-                        """,
-                        (username, first_name, last_name, email, hashed_password, "user", "local"),
-                    )
-                elif has_username and not has_is_archived:
-                    cursor.execute(
-                        """
-                        INSERT INTO users (username, fname, lname, email, password, role, auth_provider)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                        """,
-                        (username, first_name, last_name, email, hashed_password, "user", "local"),
-                    )
-                elif not has_username and has_is_archived:
-                    cursor.execute(
-                        """
-                        INSERT INTO users (fname, lname, email, password, role, auth_provider, is_archived)
-                        VALUES (%s, %s, %s, %s, %s, %s, 'Not_Archived')
-                        """,
-                        (first_name, last_name, email, hashed_password, "user", "local"),
-                    )
-                else:
-                    cursor.execute(
-                        """
-                        INSERT INTO users (fname, lname, email, password, role, auth_provider)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        """,
-                        (first_name, last_name, email, hashed_password, "user", "local"),
-                    )
+                # Insert user, default role is 'buyer'
+                cursor.execute(
+                    """
+                    INSERT INTO users (fname, lname, email, password, role)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (first_name, last_name, email, hashed_password, "buyer"),
+                )
                 conn.commit()
 
                 flash("Account created successfully! Please log in.", "success")
                 return redirect(url_for("login"))
 
-
-            # ----- SIGN IN -----
             # ----- SIGN IN -----
             elif action == "signin":
                 if not email or not password:
@@ -193,21 +179,25 @@ def login():
                 cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
                 user = cursor.fetchone()
 
-                if user and check_password_hash(user.get("password"), password):
-                    # store session
-                    session["user_id"] = user.get("id")
-                    session["user_role"] = user.get("role", "user")
-                    session["fname"] = user.get("fname") or ""
+                if user and check_password_hash(user["password"], password):
+                    # Store session info
+                    session["user_id"] = user["id"]
+                    session["user_role"] = user.get("role", "buyer")
+                    session["fname"] = user.get("fname", "")
 
-                    # redirect based on role
-                    if session["user_role"].lower() == "admin":
+                    # Redirect based on role
+                    role = session["user_role"]
+                    if role == "admin":
                         return redirect(url_for("dashboard"))
+                    elif role == "seller":
+                        return redirect(url_for("seller_dashboard"))
+                    elif role == "rider":
+                        return redirect(url_for("rider_dashboard"))
                     else:
                         return redirect(url_for("home"))
                 else:
                     flash("Invalid credentials!", "error")
                     return redirect(url_for("login"))
-
 
         except Error as e:
             print("Database error:", e)
@@ -220,6 +210,7 @@ def login():
                 conn.close()
 
     return render_template("LoginSignup/login.html")
+
 
 # ----- Logout -----
 @app.route("/logout")
@@ -238,6 +229,174 @@ def home():
 # ADMIN ROUTES
 # ==========================
 # Note: you told me admin dashboard lives at templates/AdminDashboard/admindashboard.html
+
+
+
+# ------------------- SIGNUP ROUTE -------------------
+@app.route("/signup/<token>", methods=["GET", "POST"])
+def signup_from_email(token):
+    try:
+        email = serializer.loads(token, salt="email-confirm", max_age=86400)
+    except SignatureExpired:
+        flash("This signup link has expired.", "error")
+        return redirect(url_for("index"))
+    except BadSignature:
+        flash("Invalid signup link.", "error")
+        return redirect(url_for("index"))
+
+    conn = cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        if cursor.fetchone():
+            flash("Account already exists.", "error")
+            return redirect(url_for("login"))
+
+        if request.method == "POST":
+            fname = request.form.get("fname")
+            lname = request.form.get("lname")
+            password = request.form.get("password")  # hash before storing
+            role = request.form.get("role")
+            account_status = "Active"
+
+            cursor.execute(
+                "INSERT INTO users (fname, lname, email, password, role, account_status) VALUES (%s,%s,%s,%s,%s,%s)",
+                (fname, lname, email, password, role, account_status)
+            )
+            conn.commit()
+            user_id = cursor.lastrowid
+
+            if role == "rider":
+                cursor.execute("SELECT first_name, last_name, contact_number, address, vehicle_type, vehicle_model, plate_number "
+                               "FROM riderapplications WHERE email=%s", (email,))
+                data = cursor.fetchone()
+                cursor.execute(
+                    "INSERT INTO riders (user_id, Fname, Lname, PhoneNumber, email, Address, vehicle_type, vehicle_model, plate_number) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    (user_id, data[0], data[1], data[2], email, data[3], data[4], data[5], data[6])
+                )
+            else:  # seller
+                cursor.execute("SELECT store_name, address, email, PhoneNumber "
+                               "FROM sellerapplications WHERE email=%s", (email,))
+                data = cursor.fetchone()
+                cursor.execute(
+                    "INSERT INTO seller (user_id, ShopName, Address, Email, PhoneNumber) "
+                    "VALUES (%s,%s,%s,%s,%s)",
+                    (user_id, data[0], data[1], email, data[3])
+                )
+            conn.commit()
+            flash("Signup completed successfully!", "success")
+            return redirect(url_for("login"))
+
+        return render_template("signup_form.html", email=email)
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+ 
+# ------------------- APPROVE ROUTE -------------------
+@app.route("/approve/<string:application_type>/<int:application_id>", methods=["POST"])
+def approve_application(application_type, application_id):
+    conn = cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Fetch email and name
+        if application_type == "rider":
+            cursor.execute("SELECT first_name, last_name, email FROM riderapplications WHERE application_id=%s", (application_id,))
+            app_data = cursor.fetchone()
+            if not app_data:
+                flash("Application not found.", "error")
+                return redirect(url_for("admin_dashboard"))
+            email = app_data[2]
+            name = f"{app_data[0]} {app_data[1]}"
+        else:  # seller
+            cursor.execute("SELECT store_name, email FROM sellerapplications WHERE application_id=%s", (application_id,))
+            app_data = cursor.fetchone()
+            if not app_data:
+                flash("Application not found.", "error")
+                return redirect(url_for("admin_dashboard"))
+            email = app_data[1]
+            name = app_data[0]
+
+        # Approve application
+        cursor.execute(f"UPDATE {application_type}applications SET Approval='Approved' WHERE application_id=%s", (application_id,))
+        conn.commit()
+
+        # Generate signup link
+        token = serializer.dumps(email, salt="email-confirm")
+        signup_link = url_for("signup_from_email", token=token, _external=True)
+
+        # Send email
+        body = f"Hello {name},\n\nYour {application_type} application has been approved. Complete your signup here:\n{signup_link}\nLink expires in 24 hours."
+        email_message = EmailMessage(subject="Application Approved!", body=body, to=[email])
+        email_message.send()
+
+        flash(f"{application_type.capitalize()} application approved and email sent.", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+# ------------------- REJECT ROUTE -------------------
+@app.route("/api/reject-application", methods=["POST"])
+@login_required(role="admin")
+def reject_application():
+    data = request.get_json()
+    app_id = data.get("application_id")
+    app_type = data.get("type")
+    
+    if not app_id or not app_type:
+        return jsonify({"error": "Invalid data"}), 400
+
+    conn = cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Fetch email first
+        if app_type == "seller":
+            cursor.execute("SELECT email FROM sellerapplications WHERE application_id=%s", (app_id,))
+        elif app_type == "rider":
+            cursor.execute("SELECT email FROM riderapplications WHERE application_id=%s", (app_id,))
+        else:
+            return jsonify({"error": "Unknown application type"}), 400
+
+        email_row = cursor.fetchone()
+        if not email_row:
+            return jsonify({"error": "Application not found"}), 404
+        applicant_email = email_row[0]
+
+        # Reject application
+        if app_type == "seller":
+            cursor.execute("UPDATE sellerapplications SET Approval='Rejected' WHERE application_id=%s", (app_id,))
+        else:
+            cursor.execute("UPDATE riderapplications SET Approval='Rejected' WHERE application_id=%s", (app_id,))
+        conn.commit()
+
+        # Send rejection email
+        message = EmailMessage(
+            subject="Your Application Has Been Rejected",
+            body=f"Hello,\n\nWe regret to inform you that your application has been rejected.\n\nThank you for applying.",
+            to=[applicant_email]
+        )
+        message.send()
+
+        return jsonify({"success": True})
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+        
+
+
 @app.route("/dashboard")
 @login_required(role="admin")
 def dashboard():
@@ -396,113 +555,87 @@ def api_applications():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        if filter_type == 'seller':
+        applications = []
+
+        if filter_type in ('seller', 'all'):
             cursor.execute("""
-                SELECT sa.*, u.fname, u.lname, u.email,
-                       CONCAT(u.fname, ' ', u.lname) as applicant_name,
-                       'seller' as application_type,
-                       sa.PhoneNumber as phone_number,
-                       sa.Address as address,
-                       sa.Product_Category as category,
-                       sa.application_id as submitted_date
+                SELECT sa.application_id,
+                       sa.store_name AS applicant_name,
+                       'seller' AS type,
+                       sa.PhoneNumber AS phone,
+                       sa.email AS email,
+                       sa.Address AS address,
+                       sa.Product_Category AS category,
+                       sa.Approval AS status,
+                       sa.submitted_at AS submitted,
+                       sa.valid_id_path,
+                       sa.document_path
                 FROM sellerapplications sa
-                JOIN users u ON sa.user_id = u.id
             """)
-        elif filter_type == 'rider':
+            applications += cursor.fetchall()
+
+        if filter_type in ('rider', 'all'):
             cursor.execute("""
-                SELECT ra.*, u.fname, u.lname, u.email,
-                       CONCAT(u.fname, ' ', u.lname) as applicant_name,
-                       'rider' as application_type,
-                       ra.PhoneNumber as phone_number,
-                       ra.Address as address,
-                       NULL as category,
-                       ra.application_id as submitted_date
+                SELECT ra.application_id,
+                       CONCAT(ra.first_name, ' ', ra.last_name) AS applicant_name,
+                       'rider' AS type,
+                       ra.contact_number AS phone,
+                       ra.email AS email,
+                       ra.address AS address,
+                       ra.vehicle_type AS category,
+                       ra.Approval AS status,
+                       ra.submitted_at AS submitted,
+                       ra.valid_id_path,
+                       ra.license_path,
+                       ra.orcr_upload_path,
+                       ra.vehicle_front_path,
+                       ra.vehicle_back_path
                 FROM riderapplications ra
-                JOIN users u ON ra.user_id = u.id
             """)
-        else:  # all
-            cursor.execute("""
-                SELECT sa.*, u.fname, u.lname, u.email,
-                       CONCAT(u.fname, ' ', u.lname) as applicant_name,
-                       'seller' as application_type,
-                       sa.PhoneNumber as phone_number,
-                       sa.Address as address,
-                       sa.Product_Category as category,
-                       sa.application_id as submitted_date
-                FROM sellerapplications sa
-                JOIN users u ON sa.user_id = u.id
-                UNION ALL
-                SELECT ra.*, u.fname, u.lname, u.email,
-                       CONCAT(u.fname, ' ', u.lname) as applicant_name,
-                       'rider' as application_type,
-                       ra.PhoneNumber as phone_number,
-                       ra.Address as address,
-                       NULL as category,
-                       ra.application_id as submitted_date
-                FROM riderapplications ra
-                JOIN users u ON ra.user_id = u.id
-            """)
-        
-        applications = cursor.fetchall()
+            applications += cursor.fetchall()
+
         return jsonify(applications)
+
     except Error as e:
         return jsonify({"error": str(e)}), 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
 
-# Approve application
+# APPROVAL AND REJECTION
+
 @app.route("/api/approve-application", methods=["POST"])
 @login_required(role="admin")
-def approve_application():
+def Deapprove_application():
     data = request.get_json()
-    application_id = data.get("application_id")
+    app_id = data.get("application_id")
     app_type = data.get("type")
+    
+    if not app_id or not app_type:
+        return jsonify({"error": "Invalid data"}), 400
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        if app_type == 'seller':
-            cursor.execute("UPDATE sellerapplications SET Approval='Yes' WHERE application_id=%s", (application_id,))
-        else:  # rider
-            cursor.execute("UPDATE riderapplications SET Approval='Yes' WHERE application_id=%s", (application_id,))
-        
+
+        if app_type == "seller":
+            cursor.execute("UPDATE sellerapplications SET Approval='Approved' WHERE application_id=%s", (app_id,))
+        elif app_type == "rider":
+            cursor.execute("UPDATE riderapplications SET Approval='Approved' WHERE application_id=%s", (app_id,))
+        else:
+            return jsonify({"error": "Unknown application type"}), 400
+
         conn.commit()
-        return jsonify({"success": True, "message": "Application approved successfully"})
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print("Approval error:", e)
+        return jsonify({"error": "Failed to approve application"}), 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
 
-# Reject application
-@app.route("/api/reject-application", methods=["POST"])
-@login_required(role="admin")
-def reject_application():
-    data = request.get_json()
-    application_id = data.get("application_id")
-    app_type = data.get("type")
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        if app_type == 'seller':
-            cursor.execute("UPDATE sellerapplications SET Approval='No' WHERE application_id=%s", (application_id,))
-        else:  # rider
-            cursor.execute("UPDATE riderapplications SET Approval='No' WHERE application_id=%s", (application_id,))
-        
-        conn.commit()
-        return jsonify({"success": True, "message": "Application rejected successfully"})
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
 
-# ==========================
-# REPORTS API ENDPOINTS
-# ==========================
 
 # Fetch reports
 @app.route("/api/reports")
@@ -997,6 +1130,7 @@ def api_archived_users():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
 @app.route("/apply", methods=["GET", "POST"])
 def apply():
     if request.method == "POST":
@@ -1008,30 +1142,31 @@ def apply():
             store_name = request.form.get("store_name")
             phone_number = request.form.get("phone")
             email = request.form.get("email")
-            region = request.form.get("region")
-            province = request.form.get("province")
-            city = request.form.get("city")
-            barangay = request.form.get("barangay")
+            region = request.form.get("region_name")
+            province = request.form.get("province_name")
+            city = request.form.get("city_name")
+            barangay = request.form.get("barangay_name")
+
             exact_address = request.form.get("exact_address")
+            zip_code = request.form.get("zip_code")
             product_category = request.form.get("product_category")
-            full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}"
+            full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
 
             # Files
             valid_id_file = request.files.get("valid_id")
             document_file = request.files.get("document")
 
-            # Top-level Applications folder
+            # Applications folder
             applications_folder = os.path.join("static", "uploads", "Applications")
             os.makedirs(applications_folder, exist_ok=True)
 
-            # Applicant folder inside Applications
             applicant_folder = os.path.join(applications_folder, store_name.replace(" ", "_"))
             valid_id_folder = os.path.join(applicant_folder, "Valid_IDs")
             document_folder = os.path.join(applicant_folder, "Business_Docs")
             os.makedirs(valid_id_folder, exist_ok=True)
             os.makedirs(document_folder, exist_ok=True)
 
-            # Helper function to save files
+            # Save files helper
             def save_file(file, folder, prefix):
                 if not file or not allowed_file(file.filename):
                     raise ValueError(f"Invalid {prefix} file type. Only PDF, JPG, PNG allowed.")
@@ -1039,8 +1174,7 @@ def apply():
                 file.seek(0, os.SEEK_END)
                 size = file.tell()
                 file.seek(0)
-
-                if size > app.config['MAX_CONTENT_LENGTH']:
+                if size > app.config.get('MAX_CONTENT_LENGTH', 5*1024*1024):
                     raise ValueError(f"{prefix} file must be 5MB or less.")
 
                 ext = file.filename.rsplit('.', 1)[1].lower()
@@ -1049,7 +1183,6 @@ def apply():
                 file.save(path)
                 return path
 
-            # Save files into respective folders
             valid_id_path = save_file(valid_id_file, valid_id_folder, "valid_id")
             document_path = save_file(document_file, document_folder, "document")
 
@@ -1057,15 +1190,16 @@ def apply():
             conn = get_db_connection()
             cursor = conn.cursor()
             sql = """
-                INSERT INTO sellerapplications 
-                (user_id, store_name, PhoneNumber, Email, Address, Product_Category, valid_id_path, document_path, Approval)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                INSERT INTO sellerapplications
+                (user_id, store_name, PhoneNumber, Email, Address, Product_Category, valid_id_path, document_path, Approval, submitted_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Pending', NOW())
             """
             values = (user_id, store_name, phone_number, email, full_address, product_category, valid_id_path, document_path)
             cursor.execute(sql, values)
             conn.commit()
 
-            return render_template("SellerApplications/SellerApplications.html", application_success=True)
+            flash("Application submitted successfully!", "success")
+            return redirect(url_for("apply"))
 
         except ValueError as ve:
             flash(str(ve), "error")
@@ -1075,18 +1209,142 @@ def apply():
             flash("An error occurred while submitting your application. Please try again.", "error")
             return redirect(url_for("apply"))
         finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
+            if cursor: cursor.close()
+            if conn: conn.close()
 
     return render_template("SellerApplications/SellerApplications.html")
 
 
-@app.route("/seller")
-@login_required()  # require login; change to login_required(role="seller") if you restrict to seller role
-def seller_dashboard():
+@app.route("/RiderApply", methods=["GET", "POST"])
+def RiderApply():
+    if request.method == "POST":
+        conn = cursor = None
+        try:
+            user_id = session.get("user_id")
+
+            # --- Form Data ---
+            first_name = request.form.get("first_name")
+            last_name = request.form.get("last_name")
+            birthday = request.form.get("birthday")
+            age = request.form.get("age")
+            gender = request.form.get("gender")
+            contact_number = request.form.get("contact_number")
+            email = request.form.get("email")
+            region = request.form.get("region_name")
+            province = request.form.get("province_name")
+            city = request.form.get("city_name")
+            barangay = request.form.get("barangay_name")
+            exact_address = request.form.get("exact_address")
+            zip_code = request.form.get("zip_code")
+            address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
+
+            vehicle_type = request.form.get("vehicle_type")
+            vehicle_model = request.form.get("vehicle_model")
+            plate_number = request.form.get("plate_number")
+
+            # --- File Uploads ---
+            vehicle_front = request.files.get("vehicle_front")
+            vehicle_back = request.files.get("vehicle_back")
+            valid_id = request.files.get("valid_id")
+            license_file = request.files.get("license")
+            orcr = request.files.get("orcr")
+
+            # --- Folder Setup ---
+            rider_folder = os.path.join("static", "uploads", "RiderApplications", f"{first_name}_{last_name}")
+            os.makedirs(rider_folder, exist_ok=True)
+            folders = {
+                "vehicle": os.path.join(rider_folder, "Vehicle"),
+                "ids": os.path.join(rider_folder, "Valid_IDs"),
+                "license": os.path.join(rider_folder, "Licenses"),
+                "orcr": os.path.join(rider_folder, "ORCR")
+            }
+            for path in folders.values():
+                os.makedirs(path, exist_ok=True)
+
+            # --- Save Files ---
+            def save_file(file, folder, prefix):
+                if not file or not allowed_file(file.filename):
+                    raise ValueError(f"Invalid {prefix} file type. Only PDF, JPG, PNG allowed.")
+                file.seek(0, os.SEEK_END)
+                size = file.tell()
+                file.seek(0)
+                if size > app.config.get('MAX_CONTENT_LENGTH', 5*1024*1024):
+                    raise ValueError(f"{prefix} file must be 5MB or less.")
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"{prefix}.{ext}")
+                path = os.path.join(folder, filename)
+                file.save(path)
+                return path
+
+            vehicle_front_path = save_file(vehicle_front, folders["vehicle"], "vehicle_front")
+            vehicle_back_path = save_file(vehicle_back, folders["vehicle"], "vehicle_back")
+            valid_id_path = save_file(valid_id, folders["ids"], "valid_id")
+            license_path = save_file(license_file, folders["license"], "license")
+            orcr_path = save_file(orcr, folders["orcr"], "orcr_upload")
+
+            # --- Database Insert ---
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            sql = """
+                INSERT INTO riderapplications
+                (user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                 vehicle_type, vehicle_model, plate_number, vehicle_front_path, vehicle_back_path,
+                 valid_id_path, license_path, orcr_upload_path, Approval, submitted_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', NOW())
+            """
+            values = (
+                user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                vehicle_type, vehicle_model, plate_number,
+                vehicle_front_path, vehicle_back_path, valid_id_path, license_path, orcr_path
+            )
+            cursor.execute(sql, values)
+            conn.commit()
+
+            flash("Rider registration submitted successfully!", "success")
+            return redirect(url_for("RiderApply"))
+
+        except ValueError as ve:
+            flash(str(ve), "error")
+            return redirect(url_for("RiderApply"))
+        except Exception as e:
+            print("Error submitting rider application:", e)
+            import traceback
+            traceback.print_exc()
+            flash("An error occurred while submitting your application. Please try again.", "error")
+            return redirect(url_for("RiderApply"))
+        finally:
+            if cursor: cursor.close()
+            if conn: conn.close()
+
+    return render_template("RiderApplications/RiderRegistration.html")
+
+
+
+
+@app.route("/RiderDashboard", methods=["GET", "POST"])
+def RiderDashboard():
+    return render_template("RiderApplications/RiderDashboard.html")
+
+@app.route("/RiderDelivery", methods=["GET", "POST"])
+def RiderDelivery():
+    return render_template("RiderApplications/RiderDelivery.html")
+
+@app.route("/TakeDelivery", methods=["GET", "POST"])
+def TakeDelivery():
+    return render_template("RiderApplications/TakeDelivery.html")
+
+
+
+#SELLER
+
+@app.route("/sellerdashboard", methods=["GET", "POST"])
+def sellerdashboard():
     return render_template("SellerDashboard/sellerdashboard.html")
+
+@app.route("/addproducts", methods=["GET", "POST"])
+def addproducts():
+    return render_template("SellerDashboard/addproducts.html")
+
 
 # Serve individual seller pages under /seller/<page>
 @app.route("/seller/<path:page>")
@@ -1096,7 +1354,7 @@ def seller_page(page):
     if not page.endswith(".html"):
         page = page + ".html"
     try:
-        return render_template(f"SellerDashboard/{page}")
+        return render_template(f"sellerdashboard/{page}")
     except Exception:
         # template doesn't exist
         return "Page not found", 404
@@ -1110,5 +1368,13 @@ def seller_product_form_html():
     except Exception:
         return "Page not found", 404
 
+#BUYER
+
+@app.route("/BuyerDashboard", methods=["GET", "POST"])
+def BuyerDashboard():
+    return render_template("BuyerDashboard/BuyerDashboard.html")
+
+
 if __name__ == "__main__":
+
     app.run(debug=True)

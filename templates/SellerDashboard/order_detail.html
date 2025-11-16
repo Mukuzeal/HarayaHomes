@@ -2,60 +2,73 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Order Detail</title>
+	<title>Order Detail · Haraya Home</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='sellerdashboard/sellerdashboard.css') }}">
-	<script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='SellerDashboard/css/sellerdashboard.css') }}">
+	<script src="{{ url_for('static', filename='SellerDashboard/js/seller.js') }}" defer></script>
 </head>
 <body>
 	<header>
 		<div class="logo"><img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"></div>
-		<nav class="top-nav"><a class="notification" href="#"><i class="fas fa-bell"></i></a></nav>
+		<nav class="top-nav">
+			<a class="notification" href="#" title="Notifications"><i class="fas fa-bell"></i></a>
+			<a class="mail" href="#" title="Mail"><i class="fas fa-envelope"></i></a>
+			<a class="admin" href="#" title="Profile"><i class="fas fa-user-cog"></i></a>
+		</nav>
 	</header>
 
 	<div class="container">
 		<aside class="sidebar">
 			<nav class="sidebar-nav">
-				<a href="/seller">Overview</a>
-				<a href="/seller/orders" class="dashboard active">Orders</a>
-				<a href="/seller/products">Products</a>
+				<a href="/seller" class="dashboard">Overview</a>
+				<a href="/seller/orders" class="orders active">Orders</a>
+				<a href="/seller/products" class="products">Products</a>
+				<!-- ...existing links... -->
 			</nav>
 		</aside>
 
 		<div class="main-content">
 			<main class="content card">
 				<div class="section-header">
-					<h3>Order #<span id="order-id">...</span></h3>
+					<h3>Order Detail</h3>
 					<div class="actions-inline">
-						<button class="btn" id="accept-order">Accept</button>
-						<button class="btn btn-outline" id="decline-order">Decline</button>
+						<a class="btn btn-outline" href="/seller/orders"><i class="fa-solid fa-arrow-left"></i> Back to Orders</a>
+						<button class="btn btn-light" onclick="seller.refreshOrderDetail()">Refresh</button>
 					</div>
 				</div>
 
-				<section class="card">
-					<div><strong>Buyer:</strong> <span id="buyer-name"></span></div>
-					<div><strong>Items:</strong><ul id="order-items"></ul></div>
-					<div><strong>Total:</strong> <span id="order-total"></span></div>
+				<!-- dynamic content populated by seller.js (use the provided IDs) -->
+				<section class="order-summary">
+					<p><strong>Order ID:</strong> <span id="order-id">—</span></p>
+					<p><strong>Buyer:</strong> <span id="order-buyer">—</span></p>
+					<p><strong>Date:</strong> <span id="order-date">—</span></p>
+					<p><strong>Total:</strong> <span id="order-total">—</span></p>
 				</section>
 
-				<section class="card" style="margin-top:12px">
-					<label>Assign Rider:
-						<select class="input" id="assign-rider"><option value="">Select Rider</option></select>
-					</label>
-					<label>Update Status:
-						<select class="input" id="update-status"><option>Preparing</option><option>Packed</option><option>Shipped</option><option>In Transit</option><option>Delivered</option><option>Completed</option></select>
-					</label>
-					<button class="btn" id="save-status">Save Status</button>
+				<section class="order-items">
+					<h4>Items</h4>
+					<table class="table compact" id="order-items-table">
+						<thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+						<tbody><tr><td>Loading...</td><td>—</td><td>—</td><td>—</td></tr></tbody>
+					</table>
 				</section>
 
-				<section class="card" style="margin-top:12px">
-					<h4>Payment</h4>
-					<div>Product Price: <span id="payment-product-price"></span></div>
-					<div>Commission: <span id="payment-commission"></span></div>
-					<div>Net Earnings: <span id="payment-net"></span></div>
-					<button class="btn" id="mark-paid">Mark as Paid</button>
+				<section class="order-actions">
+					<label>Update status
+						<select id="order-status" class="input">
+							<option value="pending">Pending</option>
+							<option value="packed">Packed</option>
+							<option value="shipped">Shipped</option>
+							<option value="delivered">Delivered</option>
+							<option value="completed">Completed</option>
+						</select>
+					</label>
+					<div class="form-actions">
+						<button class="btn btn-outline" onclick="seller.cancelOrder()">Cancel</button>
+						<button class="btn btn-primary" onclick="seller.updateOrderStatus()">Save</button>
+					</div>
 				</section>
 			</main>
 		</div>

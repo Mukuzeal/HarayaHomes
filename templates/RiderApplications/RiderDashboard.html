@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haraya Haul - Rider Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='RiderApplications/RiderDashboard.css') }}">
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Haraya <span>Haul</span></h2>
+        </div>
+        <nav class="menu">
+            <a href="/RiderDashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/RiderDelivery"><i class="fas fa-box"></i> Deliveries</a>
+            <a href="#"><i class="fas fa-money-bill"></i> Earnings</a>
+            <a href="#"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="#"><i class="fas fa-user"></i> Profile</a>
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <!-- TOP NAVBAR -->
+        <nav class="navbar">
+            <h1>Welcome, Rider!</h1>
+            <div class="nav-right">
+                <button class="status-btn"><i class="fas fa-circle"></i> Available</button>
+                <div class="icon notification"><i class="fas fa-bell"></i><span class="badge">3</span></div>
+                <div class="icon profile"><i class="fas fa-user-circle"></i></div>
+                <div class="icon setting"><i class="fas fas fa-cog"></i></div>
+            </div>
+        </nav>
+
+        <!-- DASHBOARD CARDS -->
+        <section class="cards">
+            <div class="card">
+                <h3>Deliveries Today</h3>
+                <p>10</p>
+            </div>
+            <div class="card">
+                <h3>Completed</h3>
+                <p>8</p>
+            </div>
+            <div class="card">
+                <h3>Pending</h3>
+                <p>2</p>
+            </div>
+            <div class="card">
+                <h3>Earnings Today</h3>
+                <p>₱620</p>
+            </div>
+        </section>
+
+        <!-- PERFORMANCE CHART / SUMMARY -->
+        <section class="performance">
+            <h2>Weekly Performance Overview</h2>
+            <div class="chart-box">
+                <p>📊 Chart Placeholder (for future JS chart or data visualization)</p>
+            </div>
+        </section>
+
+        <!-- RECENT ACTIVITY -->
+        <section class="activity">
+            <h2>Recent Activity</h2>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Delivered Order #HH-1045 to San Pablo City</li>
+                <li><i class="fas fa-truck-loading"></i> Picked up Order #HH-1046 from Warehouse</li>
+                <li><i class="fas fa-exclamation-circle"></i> Delivery failed for Order #HH-1043 (Customer not available)</li>
+                <li><i class="fas fa-wallet"></i> ₱150 added to wallet</li>
+            </ul>
+        </section>
+    </div>
+</body>
+
+</html>

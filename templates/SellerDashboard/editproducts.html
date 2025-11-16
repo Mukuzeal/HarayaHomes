@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haraya Haul - Edit Product</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='SellerDashboard/editproduct.css') }}">
+</head>
+
+<body>
+   <!-- SIDEBAR -->
+    <aside class="sidebar">
+    <div class="logo">
+      <h2>HarayaHomes</h2>
+    </div>
+
+    <nav class="menu">
+      <a href="/sellerdashboard"><i class="fas fa-home"></i> Dashboard</a>
+
+      <p class="menu-section">🛍️ Manage Products</p>
+      <a href="/addproducts"><i class="fas fa-plus-circle"></i> Add Product</a>
+      <a href="/editproducts" class="active"><i class="fas fa-pen-to-square"></i> Edit Product</a>
+      <a href="#"><i class="fas fa-box-archive"></i> Archive / Unarchive</a>
+      <a href="#"><i class="fas fa-trash"></i> Delete Product</a>
+      <a href="#"><i class="fas fa-list"></i> Product List</a>
+
+      <p class="menu-section">📦 Orders</p>
+      <a href="#"><i class="fas fa-eye"></i> View Orders</a>
+      <a href="#"><i class="fas fa-check-circle"></i> Confirm Orders</a>
+      <a href="#"><i class="fas fa-spinner"></i> Update Status</a>
+      <a href="#"><i class="fas fa-receipt"></i> Order Details</a>
+      <a href="#"><i class="fas fa-chart-bar"></i> Sales Reports</a>
+
+      <p class="menu-section">👤 Applications / Account</p>
+      <a href="#"><i class="fas fa-user-plus"></i> Apply for Account</a>
+      <a href="#"><i class="fas fa-hourglass-half"></i> Application Status</a>
+      <a href="#"><i class="fas fa-user-gear"></i> Edit Profile</a>
+      <a href="#"><i class="fas fa-right-from-bracket"></i> Logout</a>
+
+      <p class="menu-section">📊 Reports / Analytics</p>
+      <a href="#"><i class="fas fa-chart-pie"></i> Sales Report</a>
+      <a href="#"><i class="fas fa-box-open"></i> Product Status</a>
+      <a href="#"><i class="fas fa-credit-card"></i> Payment Reports</a>
+
+      <p class="menu-section">💰 Payments</p>
+      <a href="#"><i class="fas fa-money-bill-trend-up"></i> Received Payments</a>
+      <a href="#"><i class="fas fa-clock"></i> Pending Payments</a>
+      <a href="#"><i class="fas fa-file-invoice-dollar"></i> Transaction History</a>
+    </nav>
+  </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <!-- TOP NAVBAR -->
+        <nav class="navbar">
+            <h1>Edit Product</h1>
+            <div class="nav-right">
+                <div class="icon notification"><i class="fas fa-bell"></i><span class="badge">2</span></div>
+                <div class="icon profile"><i class="fas fa-user-circle"></i></div>
+            </div>
+        </nav>
+
+        <!-- EDIT PRODUCT FORM -->
+        <section class="form-section">
+            <form action="/editpoducts/{{ product.id }}" method="POST" enctype="multipart/form-data" class="product-form">
+                
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-tag"></i> Product Name</label>
+                    <input type="text" id="name" name="name" value="{{ product.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category"><i class="fas fa-list"></i> Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select category</option>
+                        <option value="Food & Beverage" {% if product.category == 'Food & Beverage' %}selected{% endif %}>Food & Beverage</option>
+                        <option value="Home Essentials" {% if product.category == 'Home Essentials' %}selected{% endif %}>Home Essentials</option>
+                        <option value="Fashion" {% if product.category == 'Fashion' %}selected{% endif %}>Fashion</option>
+                        <option value="Electronics" {% if product.category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                        <option value="Others" {% if product.category == 'Others' %}selected{% endif %}>Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="price"><i class="fas fa-peso-sign"></i> Price</label>
+                    <input type="number" id="price" name="price" step="0.01" value="{{ product.price }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock"><i class="fas fa-boxes"></i> Stock Quantity</label>
+                    <input type="number" id="stock" name="stock" value="{{ product.stock }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="description" name="description" rows="4">{{ product.description }}</textarea>
+                </div>
+
+                <div class="form-group image-group">
+                    <label for="image"><i class="fas fa-image"></i> Product Image</label>
+                    <div class="image-preview">
+                        {% if product.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="Product Image" id="preview">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='SellerDashboard/images/no-image.png') }}" alt="No Image" id="preview">
+                        {% endif %}
+                    </div>
+                    <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)">
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <a href="/SellerProducts" class="btn-secondary"><i class="fas fa-arrow-left"></i> Cancel</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const preview = document.getElementById('preview');
+                preview.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

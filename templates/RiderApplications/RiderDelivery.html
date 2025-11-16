@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haraya Haul – Deliveries</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='RiderApplications/RiderDelivery.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Haraya <span>Haul</span></h2>
+            </div>
+            <nav class="menu">
+                <a href="/RiderDashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/RiderDelivery" class="active"><i class="fas fa-box"></i> Deliveries</a>
+                <a href="#"><i class="fas fa-money-bill"></i> Earnings</a>
+                <a href="#"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="topbar">
+                <h1>Assigned Deliveries</h1>
+                <div class="top-icons">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-cog"></i>
+                </div>
+            </header>
+
+            <section class="content">
+                <div class="delivery-header">
+                    <button class="take-delivery-btn" onclick="window.location.href='/TakeDelivery'">
+                        <i class="fas fa-truck"></i> Take New Delivery
+                    </button>
+                </div>
+
+                <table class="delivery-table">
+                    <thead>
+
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Delivery Address</th>
+                            <th>Status</th>
+                            <th>Payment Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#ORD-2025-001</td>
+                            <td>Maria Santos</td>
+                            <td><a href="https://maps.google.com/?q=Sta+Rosa+Laguna" target="_blank">Sta. Rosa, Laguna</a></td>
+                            <td><span class="status pending">Pending</span></td>
+                            <td>COD</td>
+                            <td>
+                                <button class="view-btn" onclick="openModal('Maria Santos', 'Sta. Rosa, Laguna', '09171234567', 'COD', 'Small package - 2kg')"><i class="fas fa-eye"></i> View</button>
+                                <label class="upload-label">
+                  <i class="fas fa-upload"></i> Upload
+                  <input type="file" accept="image/*,application/pdf">
+                </label>
+                                <button class="delivered-btn"><i class="fas fa-check"></i> Delivered</button>
+                                <button class="failed-btn"><i class="fas fa-times"></i> Failed</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>#ORD-2025-002</td>
+                            <td>Juan Dela Cruz</td>
+                            <td><a href="https://maps.google.com/?q=Calamba+Laguna" target="_blank">Calamba, Laguna</a></td>
+                            <td><span class="status picked">Picked Up</span></td>
+                            <td>Paid Online</td>
+                            <td>
+                                <button class="view-btn" onclick="openModal('Juan Dela Cruz', 'Calamba, Laguna', '09281234567', 'Paid Online', 'Medium box - 5kg')"><i class="fas fa-eye"></i> View</button>
+                                <label class="upload-label">
+                  <i class="fas fa-upload"></i> Upload
+                  <input type="file" accept="image/*,application/pdf">
+                </label>
+                                <button class="delivered-btn"><i class="fas fa-check"></i> Delivered</button>
+                                <button class="failed-btn"><i class="fas fa-times"></i> Failed</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="deliveryModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></span>
+            <h2><i class="fas fa-box-open"></i> Delivery Details</h2>
+            <div class="modal-body">
+                <p><strong>Customer Name:</strong> <span id="modalName"></span></p>
+                <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+                <p><strong>Contact:</strong> <span id="modalContact"></span></p>
+                <p><strong>Payment Type:</strong> <span id="modalPayment"></span></p>
+                <p><strong>Package Info:</strong> <span id="modalPackage"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(name, address, contact, payment, packageInfo) {
+            document.getElementById("modalName").textContent = name;
+            document.getElementById("modalAddress").textContent = address;
+            document.getElementById("modalContact").textContent = contact;
+            document.getElementById("modalPayment").textContent = payment;
+            document.getElementById("modalPackage").textContent = packageInfo;
+            document.getElementById("deliveryModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("deliveryModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("deliveryModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

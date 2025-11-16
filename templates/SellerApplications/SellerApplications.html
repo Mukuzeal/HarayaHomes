@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='SellerApplications/SellerApplications.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -65,6 +67,9 @@
 
                 <label for="exact_address">Complete Address</label>
                 <input type="text" id="exact_address" name="exact_address" placeholder="House No., Street, Subdivision, Building, etc." required>
+
+                <label for="zip_code">ZIP Code</label>
+                <input type="text" id="zip_code" name="zip_code" placeholder="ZIP Code" required>
 
                 <!-- Document Upload -->
                 <h3 class="section-title">Verification Documents</h3>

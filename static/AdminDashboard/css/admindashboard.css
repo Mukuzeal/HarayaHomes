@@ -2,7 +2,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 1rem 2rem 2rem;
+    padding: rem 1rem 2rem 2rem;
     /* left padding adjusted */
     background-color: #FFE8DB;
     color: rgb(0, 0, 0);
@@ -17,7 +17,7 @@ header {
 }
 
 .logo img {
-    height: clamp(35px, 5vw, 50px);
+    height: clamp(35px, 20vw, 70px);
     /* responsive height: min 35px, max 50px */
     width: auto;
     display: block;
@@ -34,7 +34,7 @@ header {
 
 .top-nav a {
     font-size: clamp(1.2rem, 2vw, 1.8rem);
-    /* responsive font size */
+    /* responsive font size */    
     color: black;
     text-decoration: none;
     transition: color 0.3s ease, transform 0.2s;
@@ -86,7 +86,6 @@ header {
 
 .main-content {
     flex: 1;
-    display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-rows: auto auto auto;
     gap: 1rem;

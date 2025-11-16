@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Apply as a Rider | HarayaHomes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='RiderApplications/RiderRegistration.css') }}">
+</head>
+
+<body>
+    <div class="apply-wrapper">
+        <div class="apply-card">
+            <h2>Become a HarayaHomes Rider</h2>
+            <p class="subtext">Join our trusted logistics team and deliver products safely across the Philippines!</p>
+            <a href="{{ url_for('index') }}" class="back-home-btn">← Back to Home</a>
+            <form id="riderForm" action="{{ url_for('RiderApply') }}" method="POST" enctype="multipart/form-data">
+                <!-- STEP 1 -->
+                <div class="form-page active" id="page1">
+                    <h3 class="section-title">Personal Information</h3>
+
+                    <div class="two-cols">
+                        <div>
+                            <label for="first_name">First Name</label>
+                            <input type="text" id="first_name" name="first_name" required>
+                        </div>
+                        <div>
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" required>
+                        </div>
+                    </div>
+
+                    <label for="birthday">Birthday</label>
+                    <input type="date" id="birthday" name="birthday" required>
+
+                    <label for="age">Age</label>
+                    <input type="text" id="age" name="age" readonly>
+
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <label for="contact_number">Contact Number</label>
+                    <input type="text" id="contact_number" name="contact_number" placeholder="09XXXXXXXXX" required>
+
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+
+                    <div class="form-navigation">
+                        <button type="button" class="next-btn">Next</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="form-page" id="page2">
+                    <h3 class="section-title">Complete Address</h3>
+                    <label>Region / Province / City / Barangay</label>
+                    <div class="address-group">
+                        <select id="region" name="region" required>
+                            <option disabled selected>Select Region</option>
+                        </select>
+                        <select id="province" name="province" required>
+                            <option disabled selected>Select Province</option>
+                        </select>
+                        <select id="city" name="city" required>
+                            <option disabled selected>Select City / Municipality</option>
+                        </select>
+                        <select id="barangay" name="barangay" required>
+                            <option disabled selected>Select Barangay</option>
+                        </select>
+                    </div>
+
+                    <label for="exact_address">Specific Address</label>
+                    <input type="text" id="exact_address" name="exact_address" required>
+
+                    <label for="zip_code">ZIP Code</label>
+                    <input type="text" id="zip_code" name="zip_code" required>
+
+                    <div class="form-navigation">
+                        <button type="button" class="back-btn">Back</button>
+                        <button type="button" class="next-btn">Next</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="form-page" id="page3">
+                    <h3 class="section-title">Vehicle Information</h3>
+
+                    <label for="vehicle_type">Vehicle Type</label>
+                    <select id="vehicle_type" name="vehicle_type" required>
+                        <option disabled selected>Select Vehicle Type</option>
+                        <option value="Motorcycle">Motorcycle</option>
+                        <option value="Van">Van</option>
+                        <option value="Pickup">Pickup</option>
+                        <option value="Truck">Truck</option>
+                        <option value="Car">Car</option>
+                    </select>
+
+                    <label for="vehicle_model">Brand / Model</label>
+                    <input type="text" id="vehicle_model" name="vehicle_model" placeholder="e.g., Honda Click 125i" required>
+
+                    <label for="plate_number">Plate Number</label>
+                    <input type="text" id="plate_number" name="plate_number" placeholder="ABC-1234" required>
+
+                    <label for="vehicle_front">Vehicle Front Image</label>
+                    <input type="file" id="vehicle_front" name="vehicle_front" accept=".jpg,.jpeg,.png" required>
+
+                    <label for="vehicle_back">Vehicle Back Image</label>
+                    <input type="file" id="vehicle_back" name="vehicle_back" accept=".jpg,.jpeg,.png" required>
+
+                    <div class="form-navigation">
+                        <button type="button" class="back-btn">Back</button>
+                        <button type="button" class="next-btn">Next</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="form-page" id="page4">
+                    <h3 class="section-title">Upload Requirements</h3>
+
+                    <label for="valid_id">Valid ID</label>
+                    <input type="file" id="valid_id" name="valid_id" accept=".jpg,.jpeg,.png,.pdf" required>
+
+                    <label for="license">Driver’s License</label>
+                    <input type="file" id="license" name="license" accept=".jpg,.jpeg,.png,.pdf" required>
+
+                    <label for="orcr_upload">OR/CR (Ownership Details)</label>
+                    <input type="file" id="orcr" name="orcr" accept=".jpg,.jpeg,.png,.pdf" required>
+
+                    <div class="form-navigation">
+                        <button type="button" class="back-btn">Back</button>
+                        <button type="submit" class="submit-btn">Submit Application</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='RiderApplications/RiderRegistration.js') }}"></script>
+</body>
+
+</html>

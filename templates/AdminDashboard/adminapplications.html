@@ -8,14 +8,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/adminapplications.css') }}">
-    <script src="../js/admin.js" defer></script>
+    <script src="{{ url_for('static', filename='AdminDashboard/js/adminapplications.js') }}" defer></script>
     <title>Admin · Applications</title>
 </head>
 
 <body>
     <header>
         <div class="logo">
-            <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes"> </div>
+            <img src="{{ url_for('static', filename='LoginSignup/img/Logo-Black.png') }}" alt="HarayaHomes">
+        </div>
         <nav class="top-nav">
             <a class="notification" href="#" title="Notifications"><i class="fas fa-bell"></i></a>
             <a class="mail" href="#" title="Mail"><i class="fas fa-envelope"></i></a>
@@ -45,38 +46,43 @@
                         <button class="btn btn-outline" onclick="admin.filterApplications('rider')"><i class="fa-solid fa-motorcycle"></i> Riders</button>
                     </div>
                 </div>
-                <table class="table" id="applications-table">
+                <div class="table-wrapper">
+                   <table class="table" id="applications-table">
                     <thead>
                         <tr>
                             <th>Applicant</th>
                             <th>Type</th>
                             <th>Email</th>
                             <th>Phone</th>
-                            <th>Address</th>
-                            <th>Category</th>
+                            <th>Information</th>
                             <th>Submitted</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="applications-tbody">
                         <tr>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td>Loading...</td>
-                            <td><span class="badge">Loading...</span></td>
-                            <td>
-                                <button class="btn btn-success btn-sm" onclick="admin.approveApplication(this)" title="Approve"><i class="fa-solid fa-check"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="admin.rejectApplication(this)" title="Reject"><i class="fa-solid fa-times"></i></button>
-                            </td>
+                            <td colspan="8" class="text-center">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Modal -->
+                <div id="app-info-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-btn">&times;</span>
+                        <div id="modal-body"></div>
+                    </div>
+                </div>
             </section>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="app-info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="modal-body"></div>
         </div>
     </div>
 </body>

@@ -127,6 +127,34 @@ CREATE TABLE `reviews` (
   KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+/*Table structure for table `riderapplications` */
+
+DROP TABLE IF EXISTS `riderapplications`;
+
+CREATE TABLE `riderapplications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `birthday` date NOT NULL,
+  `age` int(11) DEFAULT NULL,
+  `gender` enum('Male','Female','Other') NOT NULL,
+  `contact_number` varchar(20) NOT NULL COMMENT 'PH Number ONLY!',
+  `email` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL COMMENT 'PH ONLY!',
+  `vehicle_type` enum('Motorcylce','Van','Pickup','Truck','Car') NOT NULL,
+  `vehicle_model` varchar(150) NOT NULL,
+  `plate_number` varchar(20) NOT NULL,
+  `vehicle_front_path` varchar(255) NOT NULL,
+  `vehicle_back_path` varchar(255) NOT NULL,
+  `valid_id_path` varchar(255) NOT NULL,
+  `license_path` varchar(255) NOT NULL,
+  `orcr_upload_path` varchar(255) NOT NULL,
+  `Approval` enum('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
+  `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`application_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 /*Table structure for table `riders` */
 
 DROP TABLE IF EXISTS `riders`;
@@ -153,7 +181,8 @@ CREATE TABLE `seller` (
   `user_id` int(11) NOT NULL,
   `ShopName` int(11) NOT NULL,
   PRIMARY KEY (`Seller_id`),
-  KEY `user_id` (`user_id`)
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `seller_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Table structure for table `sellerapplications` */
@@ -171,10 +200,11 @@ CREATE TABLE `sellerapplications` (
   `valid_id_path` varchar(255) NOT NULL,
   `document_path` varchar(255) NOT NULL,
   `Approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `submitted_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`application_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `sellerapplications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Table structure for table `users` */
 

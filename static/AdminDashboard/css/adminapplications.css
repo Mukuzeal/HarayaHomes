@@ -6,3 +6,57 @@
 .btn-outline { border-color: var(--accent); }
 .table tr:hover td { background: #f0fff7; }
 
+/* Make card content scrollable */
+.card.content {
+    height: calc(100vh - 160px); /* adjust 100px for header height + some padding */
+    overflow-y: auto;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* Optional: make table headers sticky while scrolling */
+.table thead th {
+    
+    top: 0;
+    background: #fff; /* matches card background */
+    z-index: 1;
+}
+
+
+/* Modal Styling */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 9999; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    width: 600px;
+    max-width: 90%;
+}
+
+.close-btn {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    color: #fff;
+}
+.badge-success { background-color: #10b981; }  /* Approved - green */
+.badge-warning { background-color: #f59e0b; }  /* Pending - yellow */
+.badge-danger  { background-color: #ef4444; }  /* Rejected - red */
