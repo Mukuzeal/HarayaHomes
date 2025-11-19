@@ -2,7 +2,8 @@
 SQLyog Ultimate v10.00 Beta1
 MySQL - 5.5.5-10.4.32-MariaDB : Database - harayahomesdb
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -81,8 +82,9 @@ CREATE TABLE `products` (
   `product_description` text NOT NULL,
   `price` float NOT NULL,
   `stock_quantity` int(11) NOT NULL,
-  `category` varchar(50) NOT NULL,
-  `image_url` text DEFAULT NULL,
+  `category` enum('Furniture','Home_Decor','Kitchen_Dining','Home_Improvement','Garden_Outdoor','Bedding_Bath','Cleaning_Storage','Pet_Supplies') NOT NULL,
+  `sub_category` varchar(255) NOT NULL,
+  `image_url` text NOT NULL,
   PRIMARY KEY (`Product_id`),
   KEY `seller_id` (`seller_id`),
   CONSTRAINT `products_ibfk_1` FOREIGN KEY (`seller_id`) REFERENCES `seller` (`Seller_id`)
@@ -153,7 +155,7 @@ CREATE TABLE `riderapplications` (
   `Approval` enum('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
   `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`application_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Table structure for table `riders` */
 
@@ -168,6 +170,9 @@ CREATE TABLE `riders` (
   `PhoneNumber` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `Address` varchar(255) NOT NULL,
+  `vehicle_type` enum('Motorcylce','Van','Pickup','Truck','Car') NOT NULL,
+  `vehicle_model` varchar(255) NOT NULL,
+  `plate_number` varchar(25) NOT NULL,
   PRIMARY KEY (`Rider_id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -178,12 +183,22 @@ DROP TABLE IF EXISTS `seller`;
 
 CREATE TABLE `seller` (
   `Seller_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `ShopName` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `store_name` varchar(255) DEFAULT NULL,
+  `owner_name` varchar(255) NOT NULL,
+  `store_description` varchar(255) DEFAULT NULL,
+  `Product_Category` enum('Furniture','Home_Decor','Kitchen_Dining','Home_Improvement','Garden_Outdoor','Bedding_Bath','Cleaning_Storage','Pet_Supplies') NOT NULL,
+  `PhoneNumber` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `permit_no` varchar(255) DEFAULT NULL,
+  `status` enum('pending','approved','rejected') DEFAULT NULL,
   PRIMARY KEY (`Seller_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `seller_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `user_id` (`store_name`),
+  KEY `application_id` (`application_id`),
+  CONSTRAINT `seller_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `sellerapplications` (`application_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Table structure for table `sellerapplications` */
 
@@ -193,18 +208,19 @@ CREATE TABLE `sellerapplications` (
   `application_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) DEFAULT NULL,
   `store_name` varchar(255) NOT NULL,
+  `owner_name` varchar(255) NOT NULL,
   `PhoneNumber` varchar(255) NOT NULL COMMENT 'PH Number ONLY',
   `email` varchar(255) NOT NULL,
   `Address` varchar(255) NOT NULL COMMENT 'PH ONLY',
   `Product_Category` enum('Furniture','Home_Decor','Kitchen_Dining','Home_Improvement','Garden_Outdoor','Bedding_Bath','Cleaning_Storage','Pet_Supplies') NOT NULL,
   `valid_id_path` varchar(255) NOT NULL,
   `document_path` varchar(255) NOT NULL,
-  `Approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `Approval` enum('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
   `submitted_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`application_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `sellerapplications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Table structure for table `users` */
 
@@ -216,13 +232,11 @@ CREATE TABLE `users` (
   `lname` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` varchar(255) NOT NULL,
-  `auth_provider` enum('local','google') DEFAULT 'local',
-  `google_id` varchar(255) DEFAULT NULL,
+  `role` enum('buyer','admin','seller') NOT NULL DEFAULT 'buyer',
   `account_status` enum('active','suspended','banned','deleted') DEFAULT 'active',
   `suspending_until` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

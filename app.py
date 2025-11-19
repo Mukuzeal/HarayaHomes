@@ -210,17 +210,24 @@ def login():
                     session["user_role"] = user.get("role", "buyer")
                     session["fname"] = user.get("fname", "")
 
+                    print(f"[LOGIN DEBUG] User logged in: {email}, Role: {session['user_role']}")
+                    
                     # Redirect based on role
                     role = session["user_role"]
                     if role == "admin":
+                        print(f"[LOGIN DEBUG] Redirecting to dashboard")
                         return redirect(url_for("dashboard"))
                     elif role == "seller":
+                        print(f"[LOGIN DEBUG] Redirecting to sellerdashboard")
                         return redirect(url_for("sellerdashboard"))
                     elif role == "rider":
+                        print(f"[LOGIN DEBUG] Redirecting to rider_dashboard")
                         return redirect(url_for("rider_dashboard"))
                     else:
+                        print(f"[LOGIN DEBUG] Redirecting to home")
                         return redirect(url_for("home"))
                 else:
+                    print(f"[LOGIN DEBUG] Invalid password for {email}")
                     flash("Invalid credentials!", "error")
                     return redirect(url_for("login"))
 
@@ -488,22 +495,23 @@ def api_products():
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("""
-            SELECT p.*, s.ShopName as seller_name, 
-                   CONCAT(u.fname, ' ', u.lname) as seller_full_name,
-                   u.fname, u.lname
+            SELECT p.*, s.store_name as seller_name, 
+                   s.owner_name, s.email as seller_email
             FROM products p
             LEFT JOIN seller s ON p.seller_id = s.Seller_id
-            LEFT JOIN users u ON s.user_id = u.id
             ORDER BY p.Product_id DESC
         """)
         
         products = cursor.fetchall()
         return jsonify(products)
     except Error as e:
+        print(f"Error fetching products: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # Archive product
 @app.route("/api/archive-product", methods=["POST"])
