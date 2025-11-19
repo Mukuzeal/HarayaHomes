@@ -1253,13 +1253,13 @@ def apply():
 
             # Form data
             store_name = request.form.get("store_name")
+            owner_name = request.form.get("owner_name", "")
             phone_number = request.form.get("phone")
             email = request.form.get("email")
             region = request.form.get("region")
             province = request.form.get("province")
             city = request.form.get("city")
             barangay = request.form.get("barangay")
-
             exact_address = request.form.get("exact_address")
             zip_code = request.form.get("zip_code")
             product_category = request.form.get("product_category")
@@ -1269,6 +1269,7 @@ def apply():
                 flash("Please fill in all required fields.", "error")
                 return redirect(url_for("apply"))
             
+            # Build full address
             full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
 
             # Files
@@ -1305,15 +1306,15 @@ def apply():
             valid_id_path = save_file(valid_id_file, valid_id_folder, "valid_id")
             document_path = save_file(document_file, document_folder, "document")
 
-            # Insert into database
+            # Insert into database - only use columns that exist in the table
             conn = get_db_connection()
             cursor = conn.cursor()
             sql = """
                 INSERT INTO sellerapplications
-                (user_id, store_name, PhoneNumber, email, Address, Product_Category, valid_id_path, document_path, Approval, region, province, city, barangay, exact_address)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s, %s, %s, %s)
+                (user_id, store_name, owner_name, PhoneNumber, email, Address, Product_Category, valid_id_path, document_path, Approval)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending')
             """
-            values = (user_id, store_name, phone_number, email, full_address, product_category, valid_id_path, document_path, region, province, city, barangay, exact_address)
+            values = (user_id, store_name, owner_name, phone_number, email, full_address, product_category, valid_id_path, document_path)
             cursor.execute(sql, values)
             conn.commit()
 
@@ -1328,8 +1329,10 @@ def apply():
             flash("An error occurred while submitting your application. Please try again.", "error")
             return redirect(url_for("apply"))
         finally:
-            if cursor: cursor.close()
-            if conn: conn.close()
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
 
     return render_template("SellerApplications/SellerApplications.html")
 
@@ -1416,14 +1419,12 @@ def RiderApply():
             sql = """
                 INSERT INTO riderapplications
                 (user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
-                 region, province, city, barangay, exact_address, zip_code,
                  vehicle_type, vehicle_model, plate_number, vehicle_front_path, vehicle_back_path,
                  valid_id_path, license_path, orcr_upload_path, Approval)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending')
             """
             values = (
                 user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
-                region, province, city, barangay, exact_address, zip_code,
                 vehicle_type, vehicle_model, plate_number,
                 vehicle_front_path, vehicle_back_path, valid_id_path, license_path, orcr_path
             )
