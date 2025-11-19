@@ -1,0 +1,213 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE DATABASE IF NOT EXISTS `harayahomesdb`
+  DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+USE `harayahomesdb`;
+
+-- USERS (must be created first)
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fname` varchar(255) NOT NULL,
+  `lname` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `auth_provider` enum('local','google') DEFAULT 'local',
+  `google_id` varchar(255) DEFAULT NULL,
+  `account_status` enum('active','suspended','banned','deleted') DEFAULT 'active',
+  `suspending_until` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- SELLER
+DROP TABLE IF EXISTS `seller`;
+CREATE TABLE `seller` (
+  `Seller_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `ShopName` varchar(255) NOT NULL,
+  PRIMARY KEY (`Seller_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `seller_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- RIDERS
+DROP TABLE IF EXISTS `riders`;
+CREATE TABLE `riders` (
+  `Rider_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `Fname` varchar(255) NOT NULL,
+  `Lname` varchar(255) NOT NULL,
+  `Mname` varchar(255) NOT NULL,
+  `PhoneNumber` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  PRIMARY KEY (`Rider_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `rider_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- PRODUCTS
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE `products` (
+  `Product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `seller_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` text NOT NULL,
+  `price` float NOT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `image_url` text DEFAULT NULL,
+  PRIMARY KEY (`Product_id`),
+  KEY `seller_id` (`seller_id`),
+  CONSTRAINT `products_fk_seller` FOREIGN KEY (`seller_id`) REFERENCES `seller`(`Seller_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- CART
+DROP TABLE IF EXISTS `cart`;
+CREATE TABLE `cart` (
+  `cart_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`cart_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `cart_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- CART ITEMS
+DROP TABLE IF EXISTS `cart_items`;
+CREATE TABLE `cart_items` (
+  `cart_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `cart_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT 1,
+  PRIMARY KEY (`cart_item_id`),
+  KEY `cart_id` (`cart_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `cart_items_fk_cart` FOREIGN KEY (`cart_id`) REFERENCES `cart`(`cart_id`),
+  CONSTRAINT `cart_items_fk_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`Product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ORDERS
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `seller_id` int(11) DEFAULT NULL,
+  `product_id` int(11) NOT NULL,
+  `rider_id` int(11) NOT NULL,
+  `order_date` datetime NOT NULL,
+  `orderstatus` enum('pending','preparing','shipped','received') NOT NULL,
+  `total_amount` float NOT NULL,
+  `payment_status` enum('pending','paid') NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  KEY `rider_id` (`rider_id`),
+  KEY `seller_id` (`seller_id`),
+  CONSTRAINT `orders_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  CONSTRAINT `orders_fk_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`Product_id`),
+  CONSTRAINT `orders_fk_rider` FOREIGN KEY (`rider_id`) REFERENCES `riders`(`Rider_id`),
+  CONSTRAINT `orders_fk_seller` FOREIGN KEY (`seller_id`) REFERENCES `seller`(`Seller_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- REPORTS
+DROP TABLE IF EXISTS `reports`;
+CREATE TABLE `reports` (
+  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `reported_user_id` int(11) NOT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `report_details` text NOT NULL,
+  `report_date` datetime NOT NULL,
+  `report_status` enum('pending','resolved') DEFAULT NULL,
+  `offense_level` enum('warning','suspension','ban','deleted') DEFAULT NULL,
+  `penalty_duration` int(11) DEFAULT NULL,
+  PRIMARY KEY (`report_id`),
+  KEY `user_id` (`user_id`),
+  KEY `reported_user_id` (`reported_user_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `reports_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  CONSTRAINT `reports_fk_reported_user` FOREIGN KEY (`reported_user_id`) REFERENCES `users`(`id`),
+  CONSTRAINT `reports_fk_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`Product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- REVIEWS
+DROP TABLE IF EXISTS `reviews`;
+CREATE TABLE `reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
+  `comment` text DEFAULT NULL,
+  `review_date` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`review_id`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `reviews_fk_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  CONSTRAINT `reviews_fk_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`Product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- SELLER APPLICATIONS
+DROP TABLE IF EXISTS `sellerapplications`;
+CREATE TABLE `sellerapplications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `store_name` varchar(255) NOT NULL,
+  `PhoneNumber` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `Address` varchar(255) NOT NULL,
+  `Product_Category` enum('Furniture','Home_Decor','Kitchen_Dining','Home_Improvement','Garden_Outdoor','Bedding_Bath','Cleaning_Storage','Pet_Supplies') NOT NULL,
+  `valid_id_path` varchar(255) NOT NULL,
+  `document_path` varchar(255) NOT NULL,
+  `Approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `region` varchar(255) NOT NULL,
+  `province` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `barangay` varchar(255) NOT NULL,
+  `exact_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `sellerapplications_fk_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- RIDER APPLICATIONS
+DROP TABLE IF EXISTS `riderapplications`;
+CREATE TABLE `riderapplications` (
+  `application_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `birthday` date NOT NULL,
+  `age` int(11) NOT NULL,
+  `gender` enum('Male','Female','Other') NOT NULL,
+  `contact_number` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `region` varchar(255) NOT NULL,
+  `province` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `barangay` varchar(255) NOT NULL,
+  `exact_address` varchar(255) NOT NULL,
+  `zip_code` varchar(10) NOT NULL,
+  `vehicle_type` enum('Motorcycle','Van','Pickup','Truck','Car') NOT NULL,
+  `vehicle_model` varchar(255) NOT NULL,
+  `plate_number` varchar(50) NOT NULL,
+  `vehicle_front_path` varchar(500) NOT NULL,
+  `vehicle_back_path` varchar(500) NOT NULL,
+  `valid_id_path` varchar(500) NOT NULL,
+  `license_path` varchar(500) NOT NULL,
+  `orcr_upload_path` varchar(500) NOT NULL,
+  `Approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (`application_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `riderapplications_fk_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

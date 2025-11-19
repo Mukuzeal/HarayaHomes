@@ -50,11 +50,9 @@
                         <tr>
                             <th>First Name</th>
                             <th>Last Name</th>
-                            <th>Birthday</th>
                             <th>Email</th>
                             <th>Role</th>
                             <th>Status</th>
-                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -80,13 +78,13 @@
                 renderTableRows(data);
             } catch (err) {
                 console.error(err);
-                usersTableBody.innerHTML = `<tr><td colspan="8">Error loading data.</td></tr>`;
+                usersTableBody.innerHTML = `<tr><td colspan="6">Error loading data.</td></tr>`;
             }
         }
 
         function renderTableRows(rows) {
             if (!Array.isArray(rows) || rows.length === 0) {
-                usersTableBody.innerHTML = `<tr><td colspan="8">No records found.</td></tr>`;
+                usersTableBody.innerHTML = `<tr><td colspan="6">No records found.</td></tr>`;
                 return;
             }
 
@@ -97,17 +95,14 @@
                 const email = row.email || '';
                 const role = row.role || '';
                 const status = row.status || '';
-                const created = (row.created_at || row.archived_at || '').replace('T', ' ').split('.')[0];
 
                 if (viewingArchived) {
                     return `<tr data-id="${id}">
                 <td>${first}</td>
                 <td>${last}</td>
-                <td>—</td>
                 <td>${email}</td>
                 <td>${role}</td>
                 <td><span class="badge">${status}</span></td>
-                <td>${created}</td>
                 <td>
                     <button class="btn btn-light btn-icon" title="Restore" onclick="restoreArchived(${id})">
                         <i class="fa-solid fa-rotate-left"></i>
@@ -119,17 +114,12 @@
             </tr>`;
                 } else {
                     return `<tr data-id="${id}">
-                <td contenteditable="true" data-field="first_name">${first}</td>
-                <td contenteditable="true" data-field="last_name">${last}</td>
-                <td>—</td>
-                <td contenteditable="true" data-field="email">${email}</td>
+                <td>${first}</td>
+                <td>${last}</td>
+                <td>${email}</td>
                 <td><span class="badge">${role}</span></td>
                 <td><span class="badge">${status}</span></td>
-                <td>${created}</td>
                 <td>
-                    <button class="btn btn-success btn-icon" title="Save" onclick="saveUser(${id}, this)">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                    </button>
                     <button class="btn btn-warning btn-icon" title="Archive" onclick="archiveUser(${id})">
                         <i class="fa-solid fa-archive"></i>
                     </button>
@@ -150,97 +140,88 @@
             fetchUsers();
         });
 
-        async function saveUser(id, btn) {
-            const row = btn.closest('tr');
-            const first_name = row.querySelector('[data-field="first_name"]').innerText.trim();
-            const last_name = row.querySelector('[data-field="last_name"]').innerText.trim();
-            const email = row.querySelector('[data-field="email"]').innerText.trim();
-            const role = null; // role is immutable via UI
-
+        async function archiveUser(userId) {
+            if (!confirm('Archive this user? This will move them to archived users.')) return;
             try {
-                const res = await fetch(`/api/users/${id}`, {
-                    method: 'PUT',
+                const res = await fetch('/api/users/archive', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ first_name, last_name, email })
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Update failed');
-                alert(data.message || 'User updated successfully');
+                if (!res.ok) throw new Error(data.error || 'Archive failed');
+                alert(data.message || 'User archived successfully');
                 fetchUsers();
             } catch (err) {
-                alert(err.message);
+                alert('Error: ' + err.message);
             }
         }
 
-        // Archive, Delete, Restore, DeleteArchived functions remain unchanged
-        async function archiveUser(userId) {
-            if (!confirm('Archive this user?')) return;
-            const res = await fetch('/api/users/archive', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    user_id: userId
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Archive failed');
-            alert(data.message || 'User archived');
-            fetchUsers();
-        }
-
         async function deleteUser(userId) {
-            if (!confirm('Delete this user permanently?')) return;
-            const res = await fetch('/api/users/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    user_id: userId
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Delete failed');
-            alert(data.message || 'User deleted');
-            fetchUsers();
+            if (!confirm('Delete this user permanently? This action cannot be undone.')) return;
+            try {
+                const res = await fetch('/api/users/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Delete failed');
+                alert(data.message || 'User deleted permanently');
+                fetchUsers();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
         }
 
         async function restoreArchived(id) {
-            if (!confirm('Restore this archived user?')) return;
-            const res = await fetch('/api/archived/restore', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    archived_id: id
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Restore failed');
-            alert(data.message || 'User restored');
-            fetchUsers();
+            if (!confirm('Restore this archived user? They will be moved back to active users.')) return;
+            try {
+                const res = await fetch('/api/archived/restore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        archived_id: id
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Restore failed');
+                alert(data.message || 'User restored successfully');
+                fetchUsers();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
         }
 
         async function deleteArchived(id) {
-            if (!confirm('Permanently delete this archived user?')) return;
-            const res = await fetch('/api/archived/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    archived_id: id
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Delete failed');
-            alert(data.message || 'Archived entry deleted');
-            fetchUsers();
+            if (!confirm('Permanently delete this archived user? This action cannot be undone.')) return;
+            try {
+                const res = await fetch('/api/archived/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        archived_id: id
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Delete failed');
+                alert(data.message || 'Archived user deleted permanently');
+                fetchUsers();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
         }
 
         // Initial fetch

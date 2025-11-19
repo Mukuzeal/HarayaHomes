@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/general.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/admindashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='AdminDashboard/css/adminproducts.css') }}">
-    <script src="../js/admin.js" defer></script>
+    <script src="{{ url_for('static', filename='AdminDashboard/js/admin.js') }}" defer></script>
     <title>Admin · Products</title>
 </head>
 
@@ -40,8 +40,7 @@
                 <div class="section-header">
                     <h3>Products</h3>
                     <div class="actions-inline">
-                        <button class="btn btn-outline" onclick="admin.toggleView('active')"><i class="fa-solid fa-eye"></i> Active Products</button>
-                        <button class="btn btn-outline" onclick="admin.toggleView('archived')"><i class="fa-solid fa-archive"></i> Archived Products</button>
+                        <button class="btn btn-outline" onclick="admin.loadProducts()"><i class="fa-solid fa-rotate"></i> Refresh</button>
                     </div>
                 </div>
                 <table class="table" id="products-table">

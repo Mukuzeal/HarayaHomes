@@ -39,13 +39,14 @@ const admin = {
                         </td>
                         <td>${app.submitted || '-'}</td>
                         <td>
-                            <span class="badge ${app.status === 'Approved' ? 'badge-success' : app.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}">
-                                ${app.status}
+                            <span class="badge ${app.status === 'approved' ? 'badge-success' : app.status === 'rejected' ? 'badge-danger' : 'badge-warning'}">
+                                ${app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : 'Pending'}
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-success btn-sm" onclick="admin.approveApplication('${app.application_id}', '${app.type}')"><i class="fa-solid fa-check"></i></button>
-                            <button class="btn btn-danger btn-sm" onclick="admin.rejectApplication('${app.application_id}', '${app.type}')"><i class="fa-solid fa-times"></i></button>
+                            <button class="btn btn-success btn-sm" onclick="admin.approveApplication('${app.application_id}', '${app.type}')" title="Approve"><i class="fa-solid fa-check"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="admin.rejectApplication('${app.application_id}', '${app.type}')" title="Reject"><i class="fa-solid fa-times"></i></button>
+                            <button class="btn btn-warning btn-sm" onclick="admin.deleteApplication('${app.application_id}', '${app.type}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');
@@ -85,35 +86,73 @@ const admin = {
     },
 
     approveApplication: function(id, type) {
-    // Build the URL dynamically
-    let url = `/approve/${type}/${id}`;
+        if (!confirm(`Are you sure you want to approve this ${type} application?`)) return;
+        
+        fetch('/api/approve-application', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({application_id: id, type: type})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                alert(data.message || 'Application approved successfully');
+                this.filterApplications(this.currentFilter);
+            } else {
+                alert(data.error || 'Failed to approve application');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error approving application');
+        });
+    },
 
-    fetch(url, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'}
-        // No body needed since the info is in the URL
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) this.filterApplications(this.currentFilter);
-        else alert(data.error || 'Failed to approve application');
-    })
-    .catch(err => console.error(err));
-},
+    rejectApplication: function(id, type) {
+        if (!confirm(`Are you sure you want to reject this ${type} application?`)) return;
+        
+        fetch('/api/reject-application', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({application_id: id, type: type})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                alert(data.message || 'Application rejected successfully');
+                this.filterApplications(this.currentFilter);
+            } else {
+                alert(data.error || 'Failed to reject application');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error rejecting application');
+        });
+    },
 
-rejectApplication: function(id, type) {
-    fetch('/api/reject-application', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({application_id: id, type: type})
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) this.filterApplications(this.currentFilter);
-        else alert(data.error || 'Failed to reject application');
-    })
-    .catch(err => console.error(err));
-}
+    deleteApplication: function(id, type) {
+        if (!confirm(`Are you sure you want to permanently delete this ${type} application? This action cannot be undone.`)) return;
+        
+        fetch('/api/delete-application', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({application_id: id, type: type})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                alert(data.message || 'Application deleted successfully');
+                this.filterApplications(this.currentFilter);
+            } else {
+                alert(data.error || 'Failed to delete application');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error deleting application');
+        });
+    }
 
 };
 

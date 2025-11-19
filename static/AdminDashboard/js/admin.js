@@ -52,11 +52,18 @@ class HarayaHomeAdmin {
     // ==========================
     async loadProducts() {
         try {
-            const response = await fetch(`/api/products?view=${this.currentView}`);
+            const response = await fetch('/api/products');
             const products = await response.json();
+            if (products.error) {
+                throw new Error(products.error);
+            }
             this.populateProductsTable(products);
         } catch (error) {
             console.error('Error loading products:', error);
+            const tbody = document.querySelector('#products-table tbody');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7">Error loading products: ${error.message}</td></tr>`;
+            }
         }
     }
 
@@ -65,30 +72,26 @@ class HarayaHomeAdmin {
         if (!tbody) return;
 
         tbody.innerHTML = '';
+        if (!products || products.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7">No products found.</td></tr>';
+            return;
+        }
         products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${product.product_name}</td>
+                <td>${product.product_name || 'N/A'}</td>
                 <td>${product.seller_name || 'N/A'}</td>
-                <td>₱${product.price.toFixed(2)}</td>
-                <td>${product.stock_quantity}</td>
-                <td>${product.category}</td>
-                <td><span class="badge ${product.status === 'active' ? 'badge-success' : 'badge-warning'}">${product.status}</span></td>
+                <td>₱${(product.price || 0).toFixed(2)}</td>
+                <td>${product.stock_quantity || 0}</td>
+                <td>${product.category || 'N/A'}</td>
+                <td><span class="badge badge-success">active</span></td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="admin.warnSeller(${product.Product_id}, ${product.seller_id})" title="Warn Seller">
+                    <button class="btn btn-warning btn-sm" onclick="admin.warnSeller(${product.Product_id}, ${product.seller_id || 0})" title="Warn Seller">
                         <i class="fa-solid fa-exclamation-triangle"></i>
                     </button>
-                    ${this.currentView === 'active' ? 
-                        `<button class="btn btn-danger btn-sm" onclick="admin.archiveProduct(${product.Product_id})" title="Archive">
-                            <i class="fa-solid fa-archive"></i>
-                        </button>` :
-                        `<button class="btn btn-success btn-sm" onclick="admin.restoreProduct(${product.Product_id})" title="Restore">
-                            <i class="fa-solid fa-undo"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="admin.deleteProduct(${product.Product_id})" title="Delete Permanently">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>`
-                    }
+                    <button class="btn btn-danger btn-sm" onclick="admin.deleteProduct(${product.Product_id})" title="Delete Permanently">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
             `;
             tbody.appendChild(row);
@@ -280,9 +283,16 @@ class HarayaHomeAdmin {
         try {
             const response = await fetch('/api/reports');
             const reports = await response.json();
+            if (reports.error) {
+                throw new Error(reports.error);
+            }
             this.populateReportsTable(reports);
         } catch (error) {
             console.error('Error loading reports:', error);
+            const tbody = document.querySelector('#reports-table tbody');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="9">Error loading reports: ${error.message}</td></tr>`;
+            }
         }
     }
 
@@ -291,6 +301,10 @@ class HarayaHomeAdmin {
         if (!tbody) return;
 
         tbody.innerHTML = '';
+        if (!reports || reports.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9">No reports found.</td></tr>';
+            return;
+        }
         reports.forEach(report => {
             const row = document.createElement('tr');
             row.innerHTML = `

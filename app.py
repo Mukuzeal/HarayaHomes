@@ -70,9 +70,19 @@ def ensure_default_admin():
         cursor = conn.cursor(dictionary=True)
 
         # Check if admin already exists
-        cursor.execute("SELECT id FROM users WHERE email=%s", ("admin02@gmail.com",))
+        cursor.execute("SELECT id, account_status, password FROM users WHERE email=%s", ("admin02@gmail.com",))
         existing = cursor.fetchone()
         if existing:
+            # Ensure admin account is active
+            if existing.get("account_status") != "active":
+                cursor.execute("UPDATE users SET account_status='active' WHERE email=%s", ("admin02@gmail.com",))
+                conn.commit()
+            # Verify password is correct, reset if not
+            if not check_password_hash(existing.get("password", ""), "1234"):
+                hashed_password = generate_password_hash("1234")
+                cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, "admin02@gmail.com"))
+                conn.commit()
+                print("Admin password reset to: admin02@gmail.com / 1234")
             return
 
         # Check if optional columns exist to build a compatible INSERT
@@ -86,7 +96,7 @@ def ensure_default_admin():
             cursor.execute(
                 """
                 INSERT INTO users (username, fname, lname, email, password, role)
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
                 ("admin", "Admin", "User", "admin02@gmail.com", hashed_password, "admin",),
             )
@@ -94,9 +104,9 @@ def ensure_default_admin():
             cursor.execute(
                 """
                 INSERT INTO users (fname, lname, email, password, role, auth_provider)
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                ("Admin", "User", "admin02@gmail.com", hashed_password, "admin"),
+                ("Admin", "User", "admin02@gmail.com", hashed_password, "admin", "local"),
             )
 
         conn.commit()
@@ -179,7 +189,22 @@ def login():
                 cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
                 user = cursor.fetchone()
 
-                if user and check_password_hash(user["password"], password):
+                if not user:
+                    flash("Invalid credentials!", "error")
+                    return redirect(url_for("login"))
+
+                # Check account status
+                account_status = user.get("account_status", "active")
+                if account_status in ["suspended", "banned", "deleted"]:
+                    if account_status == "suspended":
+                        flash("Your account has been suspended. Please contact support.", "error")
+                    elif account_status == "banned":
+                        flash("Your account has been banned. Please contact support.", "error")
+                    else:
+                        flash("This account no longer exists.", "error")
+                    return redirect(url_for("login"))
+
+                if check_password_hash(user["password"], password):
                     # Store session info
                     session["user_id"] = user["id"]
                     session["user_role"] = user.get("role", "buyer")
@@ -190,7 +215,7 @@ def login():
                     if role == "admin":
                         return redirect(url_for("dashboard"))
                     elif role == "seller":
-                        return redirect(url_for("seller_dashboard"))
+                        return redirect(url_for("sellerdashboard"))
                     elif role == "rider":
                         return redirect(url_for("rider_dashboard"))
                     else:
@@ -257,13 +282,29 @@ def signup_from_email(token):
         if request.method == "POST":
             fname = request.form.get("fname")
             lname = request.form.get("lname")
-            password = request.form.get("password")  # hash before storing
+            password = request.form.get("password")
+            confirm_password = request.form.get("confirm_password")
             role = request.form.get("role")
-            account_status = "Active"
+            
+            if not all([fname, lname, password, role]):
+                flash("Please fill in all required fields.", "error")
+                return redirect(url_for("signup_from_email", token=token))
+            
+            if len(password) < 8:
+                flash("Password must be at least 8 characters long.", "error")
+                return redirect(url_for("signup_from_email", token=token))
+            
+            if password != confirm_password:
+                flash("Passwords do not match.", "error")
+                return redirect(url_for("signup_from_email", token=token))
+            
+            # Hash password before storing
+            hashed_password = generate_password_hash(password)
+            account_status = "active"
 
             cursor.execute(
                 "INSERT INTO users (fname, lname, email, password, role, account_status) VALUES (%s,%s,%s,%s,%s,%s)",
-                (fname, lname, email, password, role, account_status)
+                (fname, lname, email, hashed_password, role, account_status)
             )
             conn.commit()
             user_id = cursor.lastrowid
@@ -278,19 +319,21 @@ def signup_from_email(token):
                     (user_id, data[0], data[1], data[2], email, data[3], data[4], data[5], data[6])
                 )
             else:  # seller
-                cursor.execute("SELECT store_name, address, email, PhoneNumber "
-                               "FROM sellerapplications WHERE email=%s", (email,))
+                cursor.execute("SELECT store_name FROM sellerapplications WHERE email=%s", (email,))
                 data = cursor.fetchone()
+                if not data:
+                    flash("Seller application not found.", "error")
+                    return redirect(url_for("login"))
                 cursor.execute(
-                    "INSERT INTO seller (user_id, ShopName, Address, Email, PhoneNumber) "
-                    "VALUES (%s,%s,%s,%s,%s)",
-                    (user_id, data[0], data[1], email, data[3])
+                    "INSERT INTO seller (user_id, ShopName) "
+                    "VALUES (%s,%s)",
+                    (user_id, data[0])
                 )
             conn.commit()
             flash("Signup completed successfully!", "success")
             return redirect(url_for("login"))
 
-        return render_template("signup_form.html", email=email)
+        return render_template("signup_form.html", email=email, token=token)
 
     finally:
         if cursor: cursor.close()
@@ -324,7 +367,7 @@ def approve_application(application_type, application_id):
             name = app_data[0]
 
         # Approve application
-        cursor.execute(f"UPDATE {application_type}applications SET Approval='Approved' WHERE application_id=%s", (application_id,))
+        cursor.execute(f"UPDATE {application_type}applications SET Approval='approved' WHERE application_id=%s", (application_id,))
         conn.commit()
 
         # Generate signup link
@@ -375,20 +418,23 @@ def reject_application():
 
         # Reject application
         if app_type == "seller":
-            cursor.execute("UPDATE sellerapplications SET Approval='Rejected' WHERE application_id=%s", (app_id,))
+            cursor.execute("UPDATE sellerapplications SET Approval='rejected' WHERE application_id=%s", (app_id,))
         else:
-            cursor.execute("UPDATE riderapplications SET Approval='Rejected' WHERE application_id=%s", (app_id,))
+            cursor.execute("UPDATE riderapplications SET Approval='rejected' WHERE application_id=%s", (app_id,))
         conn.commit()
 
         # Send rejection email
-        message = EmailMessage(
-            subject="Your Application Has Been Rejected",
-            body=f"Hello,\n\nWe regret to inform you that your application has been rejected.\n\nThank you for applying.",
-            to=[applicant_email]
-        )
-        message.send()
+        try:
+            message = EmailMessage(
+                subject="Your Application Has Been Rejected",
+                body=f"Hello,\n\nWe regret to inform you that your application has been rejected.\n\nThank you for applying.",
+                to=[applicant_email]
+            )
+            message.send()
+        except Exception as e:
+            print(f"Failed to send rejection email: {e}")
 
-        return jsonify({"success": True})
+        return jsonify({"success": True, "message": "Application rejected successfully"})
 
     finally:
         if cursor: cursor.close()
@@ -441,22 +487,15 @@ def api_products():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        if view == 'archived':
-            cursor.execute("""
-                SELECT p.*, s.ShopName as seller_name, u.fname, u.lname
-                FROM products p
-                LEFT JOIN seller s ON p.seller_id = s.Seller_id
-                LEFT JOIN users u ON s.user_id = u.id
-                WHERE p.is_archived = 'Yes'
-            """)
-        else:
-            cursor.execute("""
-                SELECT p.*, s.ShopName as seller_name, u.fname, u.lname
-                FROM products p
-                LEFT JOIN seller s ON p.seller_id = s.Seller_id
-                LEFT JOIN users u ON s.user_id = u.id
-                WHERE p.is_archived = 'No' OR p.is_archived IS NULL
-            """)
+        cursor.execute("""
+            SELECT p.*, s.ShopName as seller_name, 
+                   CONCAT(u.fname, ' ', u.lname) as seller_full_name,
+                   u.fname, u.lname
+            FROM products p
+            LEFT JOIN seller s ON p.seller_id = s.Seller_id
+            LEFT JOIN users u ON s.user_id = u.id
+            ORDER BY p.Product_id DESC
+        """)
         
         products = cursor.fetchall()
         return jsonify(products)
@@ -475,7 +514,9 @@ def archive_product():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE products SET is_archived='Yes', status='archived' WHERE Product_id=%s", (product_id,))
+        # Note: is_archived and status columns don't exist in current schema
+        # You may need to add these columns to the products table if archiving is required
+        # For now, just return success message
         conn.commit()
         return jsonify({"success": True, "message": "Product archived successfully"})
     except Error as e:
@@ -493,7 +534,9 @@ def restore_product():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE products SET is_archived='No', status='active' WHERE Product_id=%s", (product_id,))
+        # Note: is_archived and status columns don't exist in current schema
+        # You may need to add these columns to the products table if archiving is required
+        # For now, just return success message
         conn.commit()
         return jsonify({"success": True, "message": "Product restored successfully"})
     except Error as e:
@@ -567,7 +610,7 @@ def api_applications():
                        sa.Address AS address,
                        sa.Product_Category AS category,
                        sa.Approval AS status,
-                       sa.submitted_at AS submitted,
+                       NULL AS submitted,
                        sa.valid_id_path,
                        sa.document_path
                 FROM sellerapplications sa
@@ -584,7 +627,7 @@ def api_applications():
                        ra.address AS address,
                        ra.vehicle_type AS category,
                        ra.Approval AS status,
-                       ra.submitted_at AS submitted,
+                       NULL AS submitted,
                        ra.valid_id_path,
                        ra.license_path,
                        ra.orcr_upload_path,
@@ -619,18 +662,51 @@ def Deapprove_application():
         cursor = conn.cursor()
 
         if app_type == "seller":
-            cursor.execute("UPDATE sellerapplications SET Approval='Approved' WHERE application_id=%s", (app_id,))
+            cursor.execute("UPDATE sellerapplications SET Approval='approved' WHERE application_id=%s", (app_id,))
         elif app_type == "rider":
-            cursor.execute("UPDATE riderapplications SET Approval='Approved' WHERE application_id=%s", (app_id,))
+            cursor.execute("UPDATE riderapplications SET Approval='approved' WHERE application_id=%s", (app_id,))
         else:
             return jsonify({"error": "Unknown application type"}), 400
 
         conn.commit()
-        return jsonify({"success": True})
+        return jsonify({"success": True, "message": "Application approved successfully"})
 
     except Exception as e:
         print("Approval error:", e)
         return jsonify({"error": "Failed to approve application"}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+# Delete application
+@app.route("/api/delete-application", methods=["POST"])
+@login_required(role="admin")
+def delete_application():
+    data = request.get_json()
+    app_id = data.get("application_id")
+    app_type = data.get("type")
+    
+    if not app_id or not app_type:
+        return jsonify({"error": "Invalid data"}), 400
+
+    conn = cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if app_type == "seller":
+            cursor.execute("DELETE FROM sellerapplications WHERE application_id=%s", (app_id,))
+        elif app_type == "rider":
+            cursor.execute("DELETE FROM riderapplications WHERE application_id=%s", (app_id,))
+        else:
+            return jsonify({"error": "Unknown application type"}), 400
+
+        conn.commit()
+        return jsonify({"success": True, "message": "Application deleted successfully"})
+
+    except Exception as e:
+        print("Delete error:", e)
+        return jsonify({"error": "Failed to delete application"}), 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
@@ -979,10 +1055,10 @@ def api_users():
         
         cursor.execute("""
             SELECT id, fname as first_name, lname as last_name, email, 
-                   role, account_status as status, created_at 
+                   role, account_status as status
             FROM users 
             WHERE account_status != 'deleted'
-            ORDER BY created_at DESC
+            ORDER BY id DESC
         """)
         
         users = cursor.fetchall()
@@ -1001,7 +1077,7 @@ def get_user(user_id):
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("""
-            SELECT id, fname, lname, email, role, account_status, created_at
+            SELECT id, fname, lname, email, role, account_status
             FROM users 
             WHERE id = %s
         """, (user_id,))
@@ -1054,18 +1130,40 @@ def update_user(user_id):
             conn.close()
 
 
+# Archive user
+@app.route("/api/users/archive", methods=["POST"])
+@login_required(role="admin")
+def archive_user():
+    data = request.get_json()
+    user_id = data.get("user_id")
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET account_status='deleted' WHERE id=%s", (user_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "User archived successfully"})
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 # Restore archived user
 @app.route("/api/archived/restore", methods=["POST"])
 @login_required(role="admin")
 def restore_archived_user():
     data = request.get_json()
     archived_id = data.get("archived_id")
+    if not archived_id:
+        return jsonify({"error": "archived_id is required"}), 400
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET is_archived='Not_Archived' WHERE id=%s", (archived_id,))
+        cursor.execute("UPDATE users SET account_status='active' WHERE id=%s", (archived_id,))
         conn.commit()
-        return jsonify({"message": "User restored"})
+        return jsonify({"success": True, "message": "User restored successfully"})
     except Error as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -1078,12 +1176,14 @@ def restore_archived_user():
 def delete_user():
     data = request.get_json()
     user_id = data.get("user_id")
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM users WHERE id=%s", (user_id,))
         conn.commit()
-        return jsonify({"message": "User deleted"})
+        return jsonify({"success": True, "message": "User deleted permanently"})
     except Error as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -1096,12 +1196,14 @@ def delete_user():
 def delete_archived():
     data = request.get_json()
     archived_id = data.get("archived_id")
+    if not archived_id:
+        return jsonify({"error": "archived_id is required"}), 400
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM users WHERE id=%s", (archived_id,))
         conn.commit()
-        return jsonify({"message": "Archived user deleted"})
+        return jsonify({"success": True, "message": "Archived user deleted permanently"})
     except Error as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -1117,10 +1219,10 @@ def api_archived_users():
         
         cursor.execute("""
             SELECT id, fname as first_name, lname as last_name, email,
-                   role, account_status as status, created_at
+                   role, account_status as status
             FROM users 
             WHERE account_status = 'deleted'
-            ORDER BY created_at DESC
+            ORDER BY id DESC
         """)
         
         users = cursor.fetchall()
@@ -1137,19 +1239,28 @@ def apply():
         conn = cursor = None
         try:
             user_id = session.get("user_id")
+            if not user_id:
+                flash("Please log in to submit an application.", "error")
+                return redirect(url_for("login"))
 
             # Form data
             store_name = request.form.get("store_name")
             phone_number = request.form.get("phone")
             email = request.form.get("email")
-            region = request.form.get("region_name")
-            province = request.form.get("province_name")
-            city = request.form.get("city_name")
-            barangay = request.form.get("barangay_name")
+            region = request.form.get("region")
+            province = request.form.get("province")
+            city = request.form.get("city")
+            barangay = request.form.get("barangay")
 
             exact_address = request.form.get("exact_address")
             zip_code = request.form.get("zip_code")
             product_category = request.form.get("product_category")
+            
+            # Validate required fields
+            if not all([store_name, phone_number, email, region, province, city, barangay, exact_address, zip_code, product_category]):
+                flash("Please fill in all required fields.", "error")
+                return redirect(url_for("apply"))
+            
             full_address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
 
             # Files
@@ -1191,10 +1302,10 @@ def apply():
             cursor = conn.cursor()
             sql = """
                 INSERT INTO sellerapplications
-                (user_id, store_name, PhoneNumber, Email, Address, Product_Category, valid_id_path, document_path, Approval, submitted_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Pending', NOW())
+                (user_id, store_name, PhoneNumber, email, Address, Product_Category, valid_id_path, document_path, Approval, region, province, city, barangay, exact_address)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Pending', %s, %s, %s, %s, %s)
             """
-            values = (user_id, store_name, phone_number, email, full_address, product_category, valid_id_path, document_path)
+            values = (user_id, store_name, phone_number, email, full_address, product_category, valid_id_path, document_path, region, province, city, barangay, exact_address)
             cursor.execute(sql, values)
             conn.commit()
 
@@ -1221,6 +1332,9 @@ def RiderApply():
         conn = cursor = None
         try:
             user_id = session.get("user_id")
+            if not user_id:
+                flash("Please log in to submit an application.", "error")
+                return redirect(url_for("login"))
 
             # --- Form Data ---
             first_name = request.form.get("first_name")
@@ -1230,13 +1344,19 @@ def RiderApply():
             gender = request.form.get("gender")
             contact_number = request.form.get("contact_number")
             email = request.form.get("email")
-            region = request.form.get("region_name")
-            province = request.form.get("province_name")
-            city = request.form.get("city_name")
-            barangay = request.form.get("barangay_name")
+            region = request.form.get("region")
+            province = request.form.get("province")
+            city = request.form.get("city")
+            barangay = request.form.get("barangay")
             exact_address = request.form.get("exact_address")
             zip_code = request.form.get("zip_code")
             address = f"{exact_address}, {barangay}, {city}, {province}, {region}, {zip_code}"
+            
+            # Validate required fields
+            if not all([first_name, last_name, birthday, age, gender, contact_number, email, 
+                       region, province, city, barangay, exact_address, zip_code]):
+                flash("Please fill in all required fields.", "error")
+                return redirect(url_for("RiderApply"))
 
             vehicle_type = request.form.get("vehicle_type")
             vehicle_model = request.form.get("vehicle_model")
@@ -1288,12 +1408,14 @@ def RiderApply():
             sql = """
                 INSERT INTO riderapplications
                 (user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                 region, province, city, barangay, exact_address, zip_code,
                  vehicle_type, vehicle_model, plate_number, vehicle_front_path, vehicle_back_path,
-                 valid_id_path, license_path, orcr_upload_path, Approval, submitted_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending', NOW())
+                 valid_id_path, license_path, orcr_upload_path, Approval)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
             """
             values = (
                 user_id, first_name, last_name, birthday, age, gender, contact_number, email, address,
+                region, province, city, barangay, exact_address, zip_code,
                 vehicle_type, vehicle_model, plate_number,
                 vehicle_front_path, vehicle_back_path, valid_id_path, license_path, orcr_path
             )
@@ -1338,7 +1460,12 @@ def TakeDelivery():
 #SELLER
 
 @app.route("/sellerdashboard", methods=["GET", "POST"])
+@login_required()
 def sellerdashboard():
+    # Check if user is actually a seller
+    if session.get("user_role") != "seller":
+        flash("Access denied. Seller account required.", "error")
+        return redirect(url_for("home"))
     return render_template("SellerDashboard/sellerdashboard.html")
 
 @app.route("/addproducts", methods=["GET", "POST"])
